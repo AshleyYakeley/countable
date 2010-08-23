@@ -87,7 +87,6 @@ module Data.Searchable where
         ;
         allValues :: [a];
 
-        -- TODO: can this be promoted to Searchable?
         assemble :: (Applicative f) => (a -> f b) -> f (a -> b);
         assemble afb = fmap listLookup (traverse (\a -> fmap (\b -> (a,b)) (afb a)) allValues) where
         {
@@ -210,6 +209,7 @@ module Data.Searchable where
 
     instance (Finite a,Countable b) => Countable (a -> b) where
     {
+        -- TODO
         countPrevious = undefined;
         countMaybeNext = undefined;
 
