@@ -1,4 +1,11 @@
 {-# OPTIONS -fno-warn-orphans #-}
+-- | This module also includes these orphan instances:
+--
+-- * @('Searchable' a,'Eq' b) => 'Eq' (a -> b)@
+--
+-- * @('Finite' t) => 'Foldable' ((->) t)@
+--
+-- * @('Finite' a) => 'Traversable' ((->) a)@
 module Data.Searchable
 (
     Searchable(..),forsome,forevery,
@@ -16,6 +23,10 @@ module Data.Searchable
     import Data.Int;
     import Prelude;
 
+    -- | It turns out there are 'Searchable' instances that are not 'Finite'.
+    -- The @(c -> s)@ instance is based on the algorithm at
+    -- <http://math.andrej.com/2007/09/28/seemingly-impossible-functional-programs/>.
+    ;
     class Searchable a where
     {
         search :: (a -> Maybe b) -> Maybe b;
@@ -281,11 +292,11 @@ module Data.Searchable
     {
         countPrevious = case isoCountableFn of
         {
-            MkIsoCountable encode decode -> \ab -> fmap decode (countPrevious (encode ab));
+            MkIsoCountable encode decode -> (fmap decode) . countPrevious . encode;
         };
         countMaybeNext = case isoCountableFn of
         {
-            MkIsoCountable encode decode -> \mab -> fmap decode (countMaybeNext (fmap encode mab));
+            MkIsoCountable encode decode -> (fmap decode) . countMaybeNext . (fmap encode);
         };
     };
 
@@ -313,7 +324,7 @@ module Data.Searchable
     {
         countNext = case isoInfiniteCountableFn of
         {
-            MkIsoInfiniteCountable encode decode -> \mab -> decode (countNext (fmap encode mab));
+            MkIsoInfiniteCountable encode decode -> decode . countNext . (fmap encode);
         };
     };
 
