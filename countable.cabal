@@ -2,19 +2,20 @@ name: countable
 version: 0.1
 cabal-version: -any
 build-type: Simple
-license: AllRightsReserved
-license-file: ""
-copyright:
-maintainer:
+license: BSD3
+license-file: LICENSE
+copyright: Ashley Yakeley <ashley@semantic.org>
+maintainer: Ashley Yakeley <ashley@semantic.org>
 build-depends: base ==4.*
+cabal-version: >= 1.6
 stability:
 homepage:
 package-url:
 bug-reports:
-synopsis:
-description: .
-category:
-author:
+synopsis: Countable, Searchable, Finite, Empty classes
+description:
+category: Data
+author: Ashley Yakeley <ashley@semantic.org>
 tested-with:
 data-files:
 data-dir: ""
