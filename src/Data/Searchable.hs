@@ -1,11 +1,13 @@
 {-# OPTIONS -fno-warn-orphans #-}
 -- | This module also includes these orphan instances:
 --
--- * @('Searchable' a,'Eq' b) => 'Eq' (a -> b)@
+-- * @('Searchable' a,'Eq' b) => 'Eq' (a -> b)@ / /
 --
--- * @('Finite' t) => 'Foldable' ((->) t)@
+-- * @('Finite' t) => 'Foldable' ((->) t)@ / /
 --
--- * @('Finite' a) => 'Traversable' ((->) a)@
+-- * @('Finite' a) => 'Traversable' ((->) a)@ / /
+--
+-- * @('Show' a,'Finite' a,'Show' b) => 'Show' (a -> b)@ / /
 module Data.Searchable
 (
     Searchable(..),forsome,forevery,

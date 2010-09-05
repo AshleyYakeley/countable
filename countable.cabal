@@ -1,47 +1,43 @@
+cabal-version: >= 1.6
+
 name: countable
 version: 0.1
-cabal-version: -any
-build-type: Simple
+
 license: BSD3
 license-file: LICENSE
 copyright: Ashley Yakeley <ashley@semantic.org>
 maintainer: Ashley Yakeley <ashley@semantic.org>
-build-depends: base ==4.*
-cabal-version: >= 1.6
-stability:
-homepage:
-package-url:
-bug-reports:
+author: Ashley Yakeley <ashley@semantic.org>
+category: Data
 synopsis: Countable, Searchable, Finite, Empty classes
 description:
-category: Data
-author: Ashley Yakeley <ashley@semantic.org>
-tested-with:
-data-files:
-data-dir: ""
-extra-source-files:
-extra-tmp-files:
-exposed-modules: Data.Searchable Data.Countable Data.Empty
-exposed: True
-buildable: True
-build-tools:
-cpp-options:
-cc-options:
-ld-options:
-pkgconfig-depends:
-frameworks:
-c-sources:
+ * @class Countable@, for countable types
+ .
+ * @class AtLeastOneCountable@, for countable types that have at least one value
+ .
+ * @class InfiniteCountable@, for infinite countable types
+ .
+ * @class Searchable@, for types that can be searched over. This turns out to include some infinite types, see <http://math.andrej.com/2007/09/28/seemingly-impossible-functional-programs/>.
+ .
+ * @class Finite@, for finite types
+ .
+ * @class Empty@, for empty types
+ .
+ * @data Nothing@, an empty type
+ .
+ Some orphan instances:
+ .
+ * @(Searchable a,Eq b) => Eq (a -> b)@ / /
+ .
+ * @(Finite t) => Foldable ((->) t)@ / /
+ .
+ * @(Finite a) => Traversable ((->) a)@ / /
+ .
+ * @(Show a,Finite a,Show b) => Show (a -> b)@ / /
+
+build-type: Simple
+build-depends: base == 4.*
 extensions: EmptyDataDecls ExistentialQuantification
-extra-libraries:
-extra-lib-dirs:
-includes:
-install-includes:
-include-dirs:
 hs-source-dirs: src
-other-modules:
-ghc-prof-options:
-ghc-shared-options:
 ghc-options: -Wall
-hugs-options:
-nhc98-options:
-jhc-options:
+exposed-modules: Data.Searchable Data.Countable Data.Empty
