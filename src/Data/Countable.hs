@@ -348,29 +348,54 @@ module Data.Countable where
         countNext (Just (Left a)) = Right (countNext (recount a));
     };
 
-    instance (AtLeastOneCountable a) => Countable [a] where
+    instance (Countable a) => Countable [a] where
     {
         countPrevious [] = Nothing;
-        countPrevious (x:xs) = Just (pp x xs) where
+        countPrevious (x:xs) = case countMaybeNext Nothing of
         {
-            pp a r = case countPrevious a of
+            Nothing -> seq x undefined; -- x not supposed to exist
+            Just firsta -> Just (pp x xs) where
             {
-                Just a' -> countFirst:(pp a' r);
-                Nothing -> case r of
+                pp a r = case countPrevious a of
                 {
-                    [] -> [];
-                    b:r' -> case countMaybeNext (Just b) of
+                    Just a' -> firsta:(pp a' r);
+                    Nothing -> case r of
                     {
-                        Just b' -> b':r';
-                        Nothing -> countFirst:(pp b r');
+                        [] -> [];
+                        b:r' -> case countMaybeNext (Just b) of
+                        {
+                            Just b' -> b':r';
+                            Nothing -> firsta:(pp b r');
+                        };
                     };
                 };
             };
         };
-        countMaybeNext = Just . countNext;
+
+        countMaybeNext Nothing = Just [];
+        countMaybeNext (Just l) = case countMaybeNext Nothing of
+        {
+            Nothing -> Nothing;
+            Just firsta -> Just (countNext' l) where
+            {
+                countNext' [] = [firsta];
+                countNext' (a:r) = case countPrevious a of
+                {
+                    Just a' -> firsta:a':r;
+                    Nothing -> upOne (countNext' r);
+                };
+
+                upOne [] = [firsta];
+                upOne (a:r) = case countMaybeNext (Just a) of
+                {
+                    Just a' -> a':r;
+                    Nothing -> firsta:a:r;
+                };
+            };
+        };
     };
 
-    instance (AtLeastOneCountable a) => AtLeastOneCountable [a] where
+    instance (Countable a) => AtLeastOneCountable [a] where
     {
         countFirst = [];
     };

@@ -338,6 +338,12 @@ maybeNextPrev({T1->T3,T2->T3,T3->T3}): PASS
 prevMaybeNext(Just {T1->T3,T2->T3,T3->T3}): PASS
 findInNext({T1->T3,T2->T3,T3->T3}): PASS
 ---
+maybeNextDifferent([]): PASS
+prevDifferent([]): PASS
+maybeNextPrev([]): PASS
+prevMaybeNext(Just []): PASS
+findInNext([]): PASS
+---
 prevMaybeNext(Nothing): PASS
 prevMaybeNext(Just []): PASS
 prevMaybeNext(Just [False]): PASS

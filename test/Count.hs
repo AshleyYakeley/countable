@@ -2,6 +2,7 @@ module Main where
 {
     import Data.Countable;
     import Data.Searchable;
+    import Data.Empty;
     import Data.Word;
     import Control.Monad;
     import Prelude;
@@ -131,6 +132,8 @@ module Main where
         mapM_ testAllCountable ([[],[True,True]] :: [[Bool]]);
         mapM_ testAllInfiniteCountable ([0,1,-1,3,-7] :: [Integer]);
         mapM_ testAllCountable (allValues :: [Three -> Three]);
+        mapM_ testAllCountable (allValues :: [Nothing]);
+        mapM_ testAllCountable ([[] :: [Nothing]]);
         putStrLn "---";
         checkN 40 (Nothing :: Maybe [Bool]);
         putStrLn "---";
