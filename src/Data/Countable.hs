@@ -1,6 +1,7 @@
 module Data.Countable where
 {
     import Data.Word;
+    import Data.Int;
     import Prelude;
 
     class (Eq a) => Countable a where
@@ -32,13 +33,61 @@ module Data.Countable where
         countMaybeNext (Just True) = Nothing;
     };
 
+    boundedCountPrevious :: (Eq a,Bounded a,Enum a) => a -> Maybe a;
+    boundedCountPrevious n | n == minBound = Nothing;
+    boundedCountPrevious n = Just (pred n);
+
+    boundedCountMaybeNext :: (Eq a,Bounded a,Enum a) => Maybe a -> Maybe a;
+    boundedCountMaybeNext Nothing = Just minBound;
+    boundedCountMaybeNext (Just n) | n == maxBound = Nothing;
+    boundedCountMaybeNext (Just n) = Just (succ n);
+
     instance Countable Word8 where
     {
-        countPrevious 0 = Nothing;
-        countPrevious n = Just (n - 1);
-        countMaybeNext Nothing = Just 0;
-        countMaybeNext (Just 255) = Nothing;
-        countMaybeNext (Just n) = Just (n + 1);
+        countPrevious = boundedCountPrevious;
+        countMaybeNext = boundedCountMaybeNext;
+    };
+
+    instance Countable Word16 where
+    {
+        countPrevious = boundedCountPrevious;
+        countMaybeNext = boundedCountMaybeNext;
+    };
+
+    instance Countable Word32 where
+    {
+        countPrevious = boundedCountPrevious;
+        countMaybeNext = boundedCountMaybeNext;
+    };
+
+    instance Countable Word64 where
+    {
+        countPrevious = boundedCountPrevious;
+        countMaybeNext = boundedCountMaybeNext;
+    };
+
+    instance Countable Int8 where
+    {
+        countPrevious = boundedCountPrevious;
+        countMaybeNext = boundedCountMaybeNext;
+    };
+
+    instance Countable Int16 where
+    {
+        countPrevious = boundedCountPrevious;
+        countMaybeNext = boundedCountMaybeNext;
+    };
+
+    instance Countable Int32 where
+    {
+        countPrevious = boundedCountPrevious;
+        countMaybeNext = boundedCountMaybeNext;
+    };
+
+    instance Countable Int64 where
+    {
+        countPrevious = boundedCountPrevious;
+        countMaybeNext = boundedCountMaybeNext;
     };
 
     instance Countable Integer where
@@ -193,7 +242,42 @@ module Data.Countable where
 
     instance AtLeastOneCountable Word8 where
     {
-        countFirst = 0;
+        countFirst = minBound;
+    };
+
+    instance AtLeastOneCountable Word16 where
+    {
+        countFirst = minBound;
+    };
+
+    instance AtLeastOneCountable Word32 where
+    {
+        countFirst = minBound;
+    };
+
+    instance AtLeastOneCountable Word64 where
+    {
+        countFirst = minBound;
+    };
+
+    instance AtLeastOneCountable Int8 where
+    {
+        countFirst = minBound;
+    };
+
+    instance AtLeastOneCountable Int16 where
+    {
+        countFirst = minBound;
+    };
+
+    instance AtLeastOneCountable Int32 where
+    {
+        countFirst = minBound;
+    };
+
+    instance AtLeastOneCountable Int64 where
+    {
+        countFirst = minBound;
     };
 
     instance AtLeastOneCountable Integer where

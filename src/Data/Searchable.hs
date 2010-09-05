@@ -1,5 +1,9 @@
 {-# OPTIONS -fno-warn-orphans #-}
-module Data.Searchable where
+module Data.Searchable
+(
+    Searchable(..),forsome,forevery,
+    Finite(..),finiteSearch,finiteCountPrevious,finiteCountMaybeNext
+) where
 {
     import Data.Countable;
     import Data.Monoid;
@@ -8,6 +12,8 @@ module Data.Searchable where
     import Control.Applicative;
     import Data.Foldable hiding (find);
     import Data.Traversable;
+    import Data.Word;
+    import Data.Int;
     import Prelude;
 
     class Searchable a where
@@ -158,6 +164,86 @@ module Data.Searchable where
         assemble afb = liftA2 (\f t x -> if x then t else f) (afb False) (afb True);
     };
 
+    instance Searchable Word8 where
+    {
+        search = finiteSearch;
+    };
+
+    instance Finite Word8 where
+    {
+        allValues = enumFrom minBound;
+    };
+
+    instance Searchable Word16 where
+    {
+        search = finiteSearch;
+    };
+
+    instance Finite Word16 where
+    {
+        allValues = enumFrom minBound;
+    };
+
+    instance Searchable Word32 where
+    {
+        search = finiteSearch;
+    };
+
+    instance Finite Word32 where
+    {
+        allValues = enumFrom minBound;
+    };
+
+    instance Searchable Word64 where
+    {
+        search = finiteSearch;
+    };
+
+    instance Finite Word64 where
+    {
+        allValues = enumFrom minBound;
+    };
+
+    instance Searchable Int8 where
+    {
+        search = finiteSearch;
+    };
+
+    instance Finite Int8 where
+    {
+        allValues = enumFrom minBound;
+    };
+
+    instance Searchable Int16 where
+    {
+        search = finiteSearch;
+    };
+
+    instance Finite Int16 where
+    {
+        allValues = enumFrom minBound;
+    };
+
+    instance Searchable Int32 where
+    {
+        search = finiteSearch;
+    };
+
+    instance Finite Int32 where
+    {
+        allValues = enumFrom minBound;
+    };
+
+    instance Searchable Int64 where
+    {
+        search = finiteSearch;
+    };
+
+    instance Finite Int64 where
+    {
+        allValues = enumFrom minBound;
+    };
+
     instance (Finite a) => Finite (Maybe a) where
     {
         allValues = Nothing:(fmap Just allValues);
@@ -172,52 +258,64 @@ module Data.Searchable where
     {
         allValues = liftA2 (,) allValues allValues;
     };
-{-
-    data CI a where
+
+    setpair :: (Eq a) => (a,b) -> (a -> b) -> (a -> b);
+    setpair (a',b') _ a | a == a' = b';
+    setpair _ ab a = ab a;
+
+    data IsoCountable x = forall l. (Countable l) => MkIsoCountable (x -> l) (l -> x);
+
+    isoCountableFn :: (Finite a,Countable b) => IsoCountable (a -> b);
+    isoCountableFn = makeFromList allValues where
     {
-        MkCI :: forall l. (Countable l) => (l -> a) -> (a -> l) -> CI a;
+        makeFromList :: (Eq a,Countable b) => [a] -> IsoCountable (a -> b);
+        makeFromList [] = MkIsoCountable (\_ -> ()) (\a -> seq a undefined);
+        makeFromList (a:as) = case makeFromList as of
+        {
+            MkIsoCountable encode decode ->
+             MkIsoCountable (\ab -> (ab a,encode ab)) (\(b,l) -> setpair (a,b) (decode l));
+        };
     };
-
-    idci :: (Countable a) => CI a;
-    idci = MkCI id id;
-
-    pairci :: (Countable b) => CI a -> CI (b,a);
-    pairci (MkCI la al) = MkCI (\(
-
- --   sequenceA  :: Applicative  f => (a -> f b) -> f (a -> b)
-
---    data Counter x = MkCounter
---    {
-
---    };
-
---    pure :: x -> Counter x
---    ap :: Counter (a -> b) -> Counter a -> Counter b
-
-    data Null a = MkNull;
-    data Pair k a = MkPair a (k a);
-
-    instance Functor Null
-    instance (Functor k) => Functor (Pair k)
-
-    instance Applicative Null
-    instance (Applicative k) => Applicative (Pair k)
-
-    instance Countable (Null a)
-    instance (Countable (k a), Countable a) => Countable (Pair k a)
--}
 
     instance (Finite a,Countable b) => Countable (a -> b) where
     {
-        -- TODO
-        countPrevious = undefined;
-        countMaybeNext = undefined;
-
+        countPrevious = case isoCountableFn of
+        {
+            MkIsoCountable encode decode -> \ab -> fmap decode (countPrevious (encode ab));
+        };
+        countMaybeNext = case isoCountableFn of
+        {
+            MkIsoCountable encode decode -> \mab -> fmap decode (countMaybeNext (fmap encode mab));
+        };
     };
 
-    -- sequenceA  :: Applicative  f => (a -> (f x)) -> f (a -> x)
+    instance (Finite a,AtLeastOneCountable b) => AtLeastOneCountable (a -> b) where
+    {
+        countFirst = \_ -> countFirst;
+    };
 
-    -- (a -> [b]) -> [a -> b]
+    data IsoInfiniteCountable x = forall l. (InfiniteCountable l) => MkIsoInfiniteCountable (x -> l) (l -> x);
+
+    isoInfiniteCountableFn :: (Finite a,AtLeastOneCountable a,InfiniteCountable b) => IsoInfiniteCountable (a -> b);
+    isoInfiniteCountableFn = makeFromList allValues where
+    {
+        makeFromList :: (Eq a,InfiniteCountable b) => [a] -> IsoInfiniteCountable (a -> b);
+        makeFromList [] = undefined;
+        makeFromList [a] = MkIsoInfiniteCountable (\ab -> ab a) (\b -> setpair (a,b) (\a' -> seq a' undefined));
+        makeFromList (a:as) = case makeFromList as of
+        {
+            MkIsoInfiniteCountable encode decode ->
+             MkIsoInfiniteCountable (\ab -> (ab a,encode ab)) (\(b,l) -> setpair (a,b) (decode l));
+        };
+    };
+
+    instance (Finite a,AtLeastOneCountable a,InfiniteCountable b) => InfiniteCountable (a -> b) where
+    {
+        countNext = case isoInfiniteCountableFn of
+        {
+            MkIsoInfiniteCountable encode decode -> \mab -> decode (countNext (fmap encode mab));
+        };
+    };
 
     instance (Finite a,Finite b) => Finite (a -> b) where
     {

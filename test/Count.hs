@@ -94,6 +94,29 @@ module Main where
         };
     };
     
+    data Three = T1 | T2 | T3 deriving (Eq,Show);
+    
+    instance Searchable Three where
+    {
+        search = finiteSearch;
+    };
+    
+    instance Countable Three where
+    {
+        countPrevious = finiteCountPrevious;
+        countMaybeNext = finiteCountMaybeNext;
+    };
+    
+    instance AtLeastOneCountable Three where
+    {
+        countFirst = T1;
+    };
+    
+    instance Finite Three where
+    {
+        allValues = [T1,T2,T3];
+    };
+    
     main :: IO ();
     main = do
     {
@@ -107,6 +130,7 @@ module Main where
         mapM_ testAllCountable' ([[1,2,1],[-5,17,112]] :: [[Integer]]);
         mapM_ testAllCountable ([[],[True,True]] :: [[Bool]]);
         mapM_ testAllInfiniteCountable ([0,1,-1,3,-7] :: [Integer]);
+        mapM_ testAllCountable (allValues :: [Three -> Three]);
         putStrLn "---";
         checkN 40 (Nothing :: Maybe [Bool]);
         putStrLn "---";

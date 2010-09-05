@@ -30,7 +30,7 @@ ld-options:
 pkgconfig-depends:
 frameworks:
 c-sources:
-extensions: EmptyDataDecls
+extensions: EmptyDataDecls ExistentialQuantification
 extra-libraries:
 extra-lib-dirs:
 includes:

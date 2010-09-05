@@ -176,6 +176,168 @@ prevMaybeNext(Just (-7)): PASS
 findInNext(-7): PASS
 nextIsMaybeNext(Just (-7)): PASS
 ---
+maybeNextDifferent({T1->T1,T2->T1,T3->T1}): PASS
+prevDifferent({T1->T1,T2->T1,T3->T1}): PASS
+maybeNextPrev({T1->T1,T2->T1,T3->T1}): PASS
+prevMaybeNext(Just {T1->T1,T2->T1,T3->T1}): PASS
+findInNext({T1->T1,T2->T1,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T1,T2->T1,T3->T2}): PASS
+prevDifferent({T1->T1,T2->T1,T3->T2}): PASS
+maybeNextPrev({T1->T1,T2->T1,T3->T2}): PASS
+prevMaybeNext(Just {T1->T1,T2->T1,T3->T2}): PASS
+findInNext({T1->T1,T2->T1,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T1,T2->T1,T3->T3}): PASS
+prevDifferent({T1->T1,T2->T1,T3->T3}): PASS
+maybeNextPrev({T1->T1,T2->T1,T3->T3}): PASS
+prevMaybeNext(Just {T1->T1,T2->T1,T3->T3}): PASS
+findInNext({T1->T1,T2->T1,T3->T3}): PASS
+---
+maybeNextDifferent({T1->T1,T2->T2,T3->T1}): PASS
+prevDifferent({T1->T1,T2->T2,T3->T1}): PASS
+maybeNextPrev({T1->T1,T2->T2,T3->T1}): PASS
+prevMaybeNext(Just {T1->T1,T2->T2,T3->T1}): PASS
+findInNext({T1->T1,T2->T2,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T1,T2->T2,T3->T2}): PASS
+prevDifferent({T1->T1,T2->T2,T3->T2}): PASS
+maybeNextPrev({T1->T1,T2->T2,T3->T2}): PASS
+prevMaybeNext(Just {T1->T1,T2->T2,T3->T2}): PASS
+findInNext({T1->T1,T2->T2,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T1,T2->T2,T3->T3}): PASS
+prevDifferent({T1->T1,T2->T2,T3->T3}): PASS
+maybeNextPrev({T1->T1,T2->T2,T3->T3}): PASS
+prevMaybeNext(Just {T1->T1,T2->T2,T3->T3}): PASS
+findInNext({T1->T1,T2->T2,T3->T3}): PASS
+---
+maybeNextDifferent({T1->T1,T2->T3,T3->T1}): PASS
+prevDifferent({T1->T1,T2->T3,T3->T1}): PASS
+maybeNextPrev({T1->T1,T2->T3,T3->T1}): PASS
+prevMaybeNext(Just {T1->T1,T2->T3,T3->T1}): PASS
+findInNext({T1->T1,T2->T3,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T1,T2->T3,T3->T2}): PASS
+prevDifferent({T1->T1,T2->T3,T3->T2}): PASS
+maybeNextPrev({T1->T1,T2->T3,T3->T2}): PASS
+prevMaybeNext(Just {T1->T1,T2->T3,T3->T2}): PASS
+findInNext({T1->T1,T2->T3,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T1,T2->T3,T3->T3}): PASS
+prevDifferent({T1->T1,T2->T3,T3->T3}): PASS
+maybeNextPrev({T1->T1,T2->T3,T3->T3}): PASS
+prevMaybeNext(Just {T1->T1,T2->T3,T3->T3}): PASS
+findInNext({T1->T1,T2->T3,T3->T3}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T1,T3->T1}): PASS
+prevDifferent({T1->T2,T2->T1,T3->T1}): PASS
+maybeNextPrev({T1->T2,T2->T1,T3->T1}): PASS
+prevMaybeNext(Just {T1->T2,T2->T1,T3->T1}): PASS
+findInNext({T1->T2,T2->T1,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T1,T3->T2}): PASS
+prevDifferent({T1->T2,T2->T1,T3->T2}): PASS
+maybeNextPrev({T1->T2,T2->T1,T3->T2}): PASS
+prevMaybeNext(Just {T1->T2,T2->T1,T3->T2}): PASS
+findInNext({T1->T2,T2->T1,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T1,T3->T3}): PASS
+prevDifferent({T1->T2,T2->T1,T3->T3}): PASS
+maybeNextPrev({T1->T2,T2->T1,T3->T3}): PASS
+prevMaybeNext(Just {T1->T2,T2->T1,T3->T3}): PASS
+findInNext({T1->T2,T2->T1,T3->T3}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T2,T3->T1}): PASS
+prevDifferent({T1->T2,T2->T2,T3->T1}): PASS
+maybeNextPrev({T1->T2,T2->T2,T3->T1}): PASS
+prevMaybeNext(Just {T1->T2,T2->T2,T3->T1}): PASS
+findInNext({T1->T2,T2->T2,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T2,T3->T2}): PASS
+prevDifferent({T1->T2,T2->T2,T3->T2}): PASS
+maybeNextPrev({T1->T2,T2->T2,T3->T2}): PASS
+prevMaybeNext(Just {T1->T2,T2->T2,T3->T2}): PASS
+findInNext({T1->T2,T2->T2,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T2,T3->T3}): PASS
+prevDifferent({T1->T2,T2->T2,T3->T3}): PASS
+maybeNextPrev({T1->T2,T2->T2,T3->T3}): PASS
+prevMaybeNext(Just {T1->T2,T2->T2,T3->T3}): PASS
+findInNext({T1->T2,T2->T2,T3->T3}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T3,T3->T1}): PASS
+prevDifferent({T1->T2,T2->T3,T3->T1}): PASS
+maybeNextPrev({T1->T2,T2->T3,T3->T1}): PASS
+prevMaybeNext(Just {T1->T2,T2->T3,T3->T1}): PASS
+findInNext({T1->T2,T2->T3,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T3,T3->T2}): PASS
+prevDifferent({T1->T2,T2->T3,T3->T2}): PASS
+maybeNextPrev({T1->T2,T2->T3,T3->T2}): PASS
+prevMaybeNext(Just {T1->T2,T2->T3,T3->T2}): PASS
+findInNext({T1->T2,T2->T3,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T2,T2->T3,T3->T3}): PASS
+prevDifferent({T1->T2,T2->T3,T3->T3}): PASS
+maybeNextPrev({T1->T2,T2->T3,T3->T3}): PASS
+prevMaybeNext(Just {T1->T2,T2->T3,T3->T3}): PASS
+findInNext({T1->T2,T2->T3,T3->T3}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T1,T3->T1}): PASS
+prevDifferent({T1->T3,T2->T1,T3->T1}): PASS
+maybeNextPrev({T1->T3,T2->T1,T3->T1}): PASS
+prevMaybeNext(Just {T1->T3,T2->T1,T3->T1}): PASS
+findInNext({T1->T3,T2->T1,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T1,T3->T2}): PASS
+prevDifferent({T1->T3,T2->T1,T3->T2}): PASS
+maybeNextPrev({T1->T3,T2->T1,T3->T2}): PASS
+prevMaybeNext(Just {T1->T3,T2->T1,T3->T2}): PASS
+findInNext({T1->T3,T2->T1,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T1,T3->T3}): PASS
+prevDifferent({T1->T3,T2->T1,T3->T3}): PASS
+maybeNextPrev({T1->T3,T2->T1,T3->T3}): PASS
+prevMaybeNext(Just {T1->T3,T2->T1,T3->T3}): PASS
+findInNext({T1->T3,T2->T1,T3->T3}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T2,T3->T1}): PASS
+prevDifferent({T1->T3,T2->T2,T3->T1}): PASS
+maybeNextPrev({T1->T3,T2->T2,T3->T1}): PASS
+prevMaybeNext(Just {T1->T3,T2->T2,T3->T1}): PASS
+findInNext({T1->T3,T2->T2,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T2,T3->T2}): PASS
+prevDifferent({T1->T3,T2->T2,T3->T2}): PASS
+maybeNextPrev({T1->T3,T2->T2,T3->T2}): PASS
+prevMaybeNext(Just {T1->T3,T2->T2,T3->T2}): PASS
+findInNext({T1->T3,T2->T2,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T2,T3->T3}): PASS
+prevDifferent({T1->T3,T2->T2,T3->T3}): PASS
+maybeNextPrev({T1->T3,T2->T2,T3->T3}): PASS
+prevMaybeNext(Just {T1->T3,T2->T2,T3->T3}): PASS
+findInNext({T1->T3,T2->T2,T3->T3}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T3,T3->T1}): PASS
+prevDifferent({T1->T3,T2->T3,T3->T1}): PASS
+maybeNextPrev({T1->T3,T2->T3,T3->T1}): PASS
+prevMaybeNext(Just {T1->T3,T2->T3,T3->T1}): PASS
+findInNext({T1->T3,T2->T3,T3->T1}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T3,T3->T2}): PASS
+prevDifferent({T1->T3,T2->T3,T3->T2}): PASS
+maybeNextPrev({T1->T3,T2->T3,T3->T2}): PASS
+prevMaybeNext(Just {T1->T3,T2->T3,T3->T2}): PASS
+findInNext({T1->T3,T2->T3,T3->T2}): PASS
+---
+maybeNextDifferent({T1->T3,T2->T3,T3->T3}): PASS
+prevDifferent({T1->T3,T2->T3,T3->T3}): PASS
+maybeNextPrev({T1->T3,T2->T3,T3->T3}): PASS
+prevMaybeNext(Just {T1->T3,T2->T3,T3->T3}): PASS
+findInNext({T1->T3,T2->T3,T3->T3}): PASS
+---
 prevMaybeNext(Nothing): PASS
 prevMaybeNext(Just []): PASS
 prevMaybeNext(Just [False]): PASS
