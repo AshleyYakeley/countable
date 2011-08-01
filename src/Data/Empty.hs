@@ -2,6 +2,7 @@ module Data.Empty where
 {
     import Data.Countable;
     import Data.Searchable;
+    import Control.Applicative;
 
     class (Finite n) => Empty n where
     {
@@ -42,6 +43,7 @@ module Data.Empty where
     instance Finite Nothing where
     {
         allValues = [];
+        assemble _ = pure never;
     };
 
     instance Empty Nothing;
