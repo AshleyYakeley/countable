@@ -14,6 +14,7 @@ module Data.Searchable
     Finite(..),finiteSearch,finiteCountPrevious,finiteCountMaybeNext
 ) where
 {
+    import Data.Expression;
     import Data.Countable;
     import Data.Monoid;
     import Data.Maybe;
@@ -333,36 +334,13 @@ module Data.Searchable
         };
     };
 
-    data Exp a b f r = Closed (f r) | Open a (Exp a b f (b -> r));
-
-    instance (Functor f) => Functor (Exp a b f) where
-    {
-        fmap pq (Closed fp) = Closed (fmap pq fp);
-        fmap pq (Open a ebp) = Open a (fmap (\bp -> pq . bp) ebp);
-    };
-
-    ffmap :: (Applicative f) => f (p -> q) -> Exp a b f p -> Exp a b f q;
-    ffmap fpq (Closed fp) = Closed (fpq <*> fp);
-    ffmap fpq (Open a ebp) = Open a (ffmap (fmap (\pq bp -> pq . bp) fpq) ebp);
-
-    instance (Applicative f) => Applicative (Exp x b f) where
-    {
-        pure t = Closed (pure t);
-        (Closed fpq) <*> ep = ffmap fpq ep;
-        (Open a ebpq) <*> ep = Open a ((fmap (\bpq p b -> bpq b p) ebpq) <*> ep);
-    };
-
-    runExp :: (Functor f) => Exp a b f r -> f ((a -> b) -> r);
-    runExp (Closed fr) = fmap (\r _ab -> r) fr;
-    runExp (Open a0 ebr) = fmap (\abbr ab -> abbr ab (ab a0)) (runExp ebr);
-
     instance (Finite a,Finite b) => Finite (a -> b) where
     {
         allValues = sequenceA (\_ -> allValues);
-        assemble abfr = runExp (Data.Foldable.foldr assemble1 (\ab -> Closed (abfr ab)) allValues (\_ -> error "missing value")) where
+        assemble abfr = runExpression (Data.Foldable.foldr assemble1 (\ab -> ClosedExpression (abfr ab)) allValues (\_ -> error "missing value")) where
         {
-            -- assemble1 :: a -> ((a -> b) -> Exp a b f r) -> (a -> b) -> Exp a b f r
-            assemble1 a0 aber x = Open a0 (assemble (\b0 -> aber (\a -> if a == a0 then b0 else x a)))
+            -- assemble1 :: a -> ((a -> b) -> Expression a b f r) -> (a -> b) -> Expression a b f r
+            assemble1 a0 aber x = OpenExpression a0 (assemble (\b0 -> aber (\a -> if a == a0 then b0 else x a)))
         };
     };
 
