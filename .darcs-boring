@@ -1,6 +1,0 @@
-dist($|/)
-\.lkshs$
-^test/.*\.hi$
-^test/.*\.o$
-^test/.*\.out$
-^test/Count$
