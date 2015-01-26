@@ -1,12 +1,13 @@
-default: complete
+default: clean test sdist
 
 # Building
 
 clean:
 	cabal clean
+	cd test && make clean
 
 configure:
-	cabal configure
+	cabal configure --enable-library-profiling --enable-executable-profiling --enable-tests
 
 build: configure
 	cabal build --ghc-options=-Werror
@@ -14,12 +15,13 @@ build: configure
 haddock: configure
 	cabal haddock
 
-install: build
-	cabal install --user
+copy: build test haddock
+	cabal copy
 
-complete: install haddock
+install:
+	cabal install --user --ghc-options=-Werror --enable-library-profiling --enable-executable-profiling
 
-sdist: configure
+sdist: clean configure
 	cabal sdist
 
 test: install
@@ -28,4 +30,4 @@ test: install
 # switch off intermediate file deletion
 .SECONDARY:
 
-.PHONY: default configure build haddock install complete test sdist
+.PHONY: default clean configure build haddock copy install test sdist
