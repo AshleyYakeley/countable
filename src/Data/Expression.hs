@@ -1,4 +1,4 @@
-module Data.Expression (Expression(..),runExpression) where
+module Data.Expression (Expression(..),expressionSym,runExpression) where
 {
     import Control.Applicative;
 
@@ -20,6 +20,9 @@ module Data.Expression (Expression(..),runExpression) where
         (ClosedExpression fpq) <*> ep = ffmap fpq ep;
         (OpenExpression a ebpq) <*> ep = OpenExpression a ((fmap (\bpq p b -> bpq b p) ebpq) <*> ep);
     };
+
+    expressionSym :: a -> f (b -> r) -> Expression a b f r;
+    expressionSym a fbr = OpenExpression a (ClosedExpression fbr);
 
     runExpression :: (Functor f) => Expression a b f r -> f ((a -> b) -> r);
     runExpression (ClosedExpression fr) = fmap (\r _ab -> r) fr;
