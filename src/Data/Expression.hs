@@ -1,7 +1,5 @@
 module Data.Expression (Expression(..),expressionSym,runExpression) where
 {
-    import Control.Applicative;
-
     data Expression a b f r = ClosedExpression (f r) | OpenExpression a (Expression a b f (b -> r));
 
     instance (Functor f) => Functor (Expression a b f) where
