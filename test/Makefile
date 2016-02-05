@@ -7,7 +7,7 @@ default: test
 	diff -U0 $^
 
 Count: Count.hs
-	ghc $^ -o $@ -package countable
+	stack ghc -- $^ -o $@ -package countable
 
 test: Count.diff
 	@echo "Success!"
