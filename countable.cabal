@@ -43,7 +43,8 @@ library
     default-extensions:
         EmptyDataDecls
         ExistentialQuantification
-    build-depends: base ==4.*
+    build-depends:
+        base >= 4.8
     exposed-modules:
         Data.Expression
         Data.Searchable
