@@ -337,7 +337,7 @@ module Data.Searchable
     instance (Finite a,Finite b) => Finite (a -> b) where
     {
         allValues = sequenceA (\_ -> allValues);
-        assemble abfr = runExpression (Data.Foldable.foldr assemble1 (\ab -> ClosedExpression (abfr ab)) allValues (\_ -> error "missing value")) where
+        assemble abfr = runValueExpression (Data.Foldable.foldr assemble1 (\ab -> ClosedExpression (abfr ab)) allValues (\_ -> error "missing value")) where
         {
             -- assemble1 :: a -> ((a -> b) -> Expression a b f r) -> (a -> b) -> Expression a b f r
             assemble1 a0 aber x = OpenExpression a0 (assemble (\b0 -> aber (\a -> if a == a0 then b0 else x a)))
