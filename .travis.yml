@@ -8,7 +8,7 @@ language: c
 
 os:
   - linux
-  - osx
+  # - osx
 
 # Caching so the next build will be fast too.
 cache:
@@ -16,7 +16,6 @@ cache:
   - $HOME/.stack
 
 env:
-  - ARGS=""
   - ARGS="--resolver lts-2"
   - ARGS="--resolver lts-3"
   - ARGS="--resolver lts-5"
