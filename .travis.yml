@@ -14,7 +14,6 @@ addons:
 
 os:
   - linux
-  # - osx
 
 # Caching so the next build will be fast too.
 cache:
