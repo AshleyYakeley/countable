@@ -21,15 +21,14 @@ cache:
   - $HOME/.stack
 
 env:
-  - ARGS="--resolver lts-3"
-  - ARGS="--resolver lts-5"
-  - ARGS="--resolver lts"
-  - ARGS="--resolver nightly"
+  - RESOLVER=lts-3
+  - RESOLVER=lts-5
+  - RESOLVER=lts
+  - RESOLVER=nightly"
 
 before_install:
 # Using compiler above sets CC to an invalid value, so unset it
 - unset CC
-
 # Download and unpack the stack executable
 - mkdir -p ~/.local/bin
 - export PATH=$HOME/.local/bin:$PATH
@@ -41,19 +40,15 @@ before_install:
     travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
   fi
 
-# Get the list of packages from the stack.yaml file
-# - PACKAGES=$(stack --install-ghc query locals | grep '^ *path' | sed 's@^ *path:@@')
-
 install:
-- echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
 - if [ -f configure.ac ]; then autoreconf -i; fi
 - |
   set -ex
-  stack --no-terminal --install-ghc $ARGS test --bench --only-dependencies
+  stack --no-terminal --install-ghc --resolver $RESOLVER test --bench --only-dependencies
   set +ex
 
 script:
 - |
   set -ex
-  stack --no-terminal $ARGS test --bench --no-run-benchmarks --haddock --no-haddock-deps
+  stack --no-terminal --resolver $RESOLVER test --bench --no-run-benchmarks --haddock --no-haddock-deps
   set +ex
