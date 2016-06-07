@@ -6,7 +6,6 @@ module Data.Empty where
     class (Finite n) => Empty n where
     {
         never :: n -> a;
-        never n = seq n undefined;
     };
 
     instance (Empty a,Empty b) => Empty (Either a b) where
@@ -25,39 +24,42 @@ module Data.Empty where
         never ab = never (ab countFirst);
     };
 
-    data Nothing;
+    data None;
 
-    instance Countable Nothing where
+    instance Countable None where
     {
         countPrevious = never;
         countMaybeNext Nothing = Nothing;
         countMaybeNext (Just n) = never n;
     };
 
-    instance Searchable Nothing where
+    instance Searchable None where
     {
         search = finiteSearch;
     };
 
-    instance Finite Nothing where
+    instance Finite None where
     {
         allValues = [];
         assemble _ = pure never;
     };
 
-    instance Empty Nothing;
+    instance Empty None where
+    {
+        never a = case a of {};
+    };
 
-    instance Eq Nothing where
+    instance Eq None where
     {
         a == _b = never a;
     };
 
-    instance Ord Nothing where
+    instance Ord None where
     {
         a <= _b = never a;
     };
 
-    instance Show Nothing where
+    instance Show None where
     {
         show a = never a;
     };

@@ -42,6 +42,7 @@ library
     default-language: Haskell2010
     default-extensions:
         ExistentialQuantification
+        EmptyCase
     build-depends:
         base >= 4.8
     exposed-modules:
