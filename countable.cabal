@@ -59,8 +59,18 @@ test-suite tests
     default-extensions:
         ExistentialQuantification
         EmptyCase
+        ScopedTypeVariables
     build-depends:
         base >= 4.8,
-        countable
+        countable,
+        bytestring,
+        silently,
+        tasty,
+        tasty-hunit,
+        tasty-golden
     main-is: Count.hs
+    other-modules:
+        TypeName
+        Three
+        Golden
     ghc-options: -Wall

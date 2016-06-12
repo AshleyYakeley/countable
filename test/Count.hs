@@ -1,144 +1,101 @@
 module Main where
 {
-    import Data.Countable;
-    import Data.Searchable;
-    import Data.Empty;
-    import Data.Word;
-    import Control.Monad;
     import Prelude;
+    import Data.Word;
+    import Test.Tasty;
+    import Test.Tasty.HUnit;
 
-    type Property a = a -> Bool;
+    import Data.Empty;
+    import Data.Searchable;
+    import Data.Countable;
 
-    testProperty :: (Show a) => String -> Property a -> a -> IO ();
-    testProperty s prop a = do
-    {
-        putStrLn (s ++ "(" ++ (show a) ++ "): " ++ (if prop a then "PASS" else "FAIL"));
-    };
+    import TypeName;
+    import Three;
+    import Golden;
 
-    maybeNextDifferent :: (Countable a) => Property a;
-    maybeNextDifferent a = countMaybeNext (Just a) /= Just a;
+    (@/=?) :: (Eq a,Show a) => a -> a -> Assertion;
+    unexpected @/=? actual | unexpected /= actual = return ();
+    _unexpected @/=? actual = assertFailure $ "got unexpected " ++ show actual;
 
-    prevDifferent :: (Countable a) => Property a;
-    prevDifferent a = countPrevious a /= Just a;
-
-    maybeNextPrev :: (Countable a) => Property a;
-    maybeNextPrev a = countMaybeNext (countPrevious a) == Just a;
-
-    prevMaybeNext :: (Countable a) => Property (Maybe a);
+    prevMaybeNext :: (Countable a,Show a) => Maybe a -> Assertion;
     prevMaybeNext ma = case countMaybeNext ma of
     {
-        Just a' -> countPrevious a' == ma;
-        Nothing -> True;
+        Just a' -> countPrevious a' @=? ma;
+        Nothing -> return ();
     };
 
-    testAllCountable' :: (Show a,Countable a) => a -> IO ();
-    testAllCountable' a = do
-    {
-        putStrLn "---";
-        testProperty "maybeNextDifferent" maybeNextDifferent a;
-        testProperty "prevDifferent" prevDifferent a;
-        testProperty "maybeNextPrev" maybeNextPrev a;
-        testProperty "prevMaybeNext" prevMaybeNext (Just a);
-    };
+    countableTests' :: (Show a,Countable a) => a -> [TestTree];
+    countableTests' a =
+    [
+        testCase "maybeNextDifferent" $ (Just a) @/=? countMaybeNext (Just a),
+        testCase "prevDifferent" $ (Just a) @/=? (countPrevious a),
+        testCase "maybeNextPrev" $ (Just a) @=? countMaybeNext (countPrevious a),
+        testCase "prevMaybeNext" $ prevMaybeNext (Just a)
+    ];
 
-    testAllCountable :: (Show a,Countable a) => a -> IO ();
-    testAllCountable a = do
+    findInNext :: (Countable a) => Int -> a -> TestTree;
+    findInNext n a = testCase "findInNext" $ findInNext' n Nothing where
     {
-        testAllCountable' a;
-        testProperty "findInNext" (findInNext 1000) a;
-    };
-
-    testCountableValue :: (Show a, Countable a) => a -> IO ();
-    testCountableValue a = let
-    {
-        ma1 = countPrevious a;
-        ma' = countMaybeNext ma1;
-    } in do
-    {
-        putStrLn (show (ma' == Just a,a,ma1,ma'));
-    };
-
-    nextIsMaybeNext :: (InfiniteCountable a) => Property (Maybe a);
-    nextIsMaybeNext ma = countMaybeNext ma == Just (countNext ma);
-
-    testAllInfiniteCountable :: (Show a,InfiniteCountable a) => a -> IO ();
-    testAllInfiniteCountable a = do
-    {
-        testAllCountable a;
-        testProperty "nextIsMaybeNext" nextIsMaybeNext (Just a);
-    };
-
-    findInNext :: (Countable a) => Int -> Property a;
-    findInNext n a = findInNext' n Nothing where
-    {
-        findInNext' 0 _ = False;
-        findInNext' _ (Just x) | x == a = True;
+        findInNext' 0 _ = assertFailure "failed";
+        findInNext' _ (Just x) | x == a = return ();
         findInNext' n' mx = case countMaybeNext mx of
         {
-            Nothing -> False;
+            Nothing -> assertFailure "failed";
             mx' -> findInNext' (n' - 1) mx';
         };
     };
 
-    checkN :: (Show a,Countable a) => Int -> Maybe a -> IO ();
-    checkN 0 _ = return ();
-    checkN n ma = let
+    countableTests :: (Show a,Countable a) => a -> [TestTree];
+    countableTests a = (countableTests' a) ++ [findInNext 1000 a];
+
+    nextIsMaybeNext :: (Show a,InfiniteCountable a) => Maybe a -> TestTree;
+    nextIsMaybeNext ma = testCase "nextIsMaybeNext" $ (Just (countNext ma)) @=? (countMaybeNext ma);
+
+    infiniteCountableTests :: (Show a,InfiniteCountable a) => a -> [TestTree];
+    infiniteCountableTests a = (countableTests a) ++ [nextIsMaybeNext (Just a)];
+    checkN :: (Show a,Countable a) => (String -> IO ()) -> Int -> Maybe a -> IO ();
+    checkN _ 0 _ = return ();
+    checkN write n ma = let
     {
         ma' = countMaybeNext ma;
     } in do
     {
-        testProperty "prevMaybeNext" prevMaybeNext ma;
+        prevMaybeNext ma;
+        write (show ma ++ "\n");
         case ma' of
         {
             Nothing -> return ();
-            _ -> checkN (n - 1) ma';
+            _ -> checkN write (n - 1) ma';
         };
     };
 
-    data Three = T1 | T2 | T3 deriving (Eq,Show);
+    testType :: forall a. (TypeName a,Show a) => (a -> [TestTree]) -> [a] -> TestTree;
+    testType tests vals = testGroup (typeName vals) $ fmap (\a -> testGroup (show a) (tests a)) vals;
 
-    instance Searchable Three where
-    {
-        search = finiteSearch;
-    };
-
-    instance Countable Three where
-    {
-        countPrevious = finiteCountPrevious;
-        countMaybeNext = finiteCountMaybeNext;
-    };
-
-    instance AtLeastOneCountable Three where
-    {
-        countFirst = T1;
-    };
-
-    instance Finite Three where
-    {
-        allValues = [T1,T2,T3];
-    };
+    allTests :: TestTree;
+    allTests = testGroup "countable"
+        [
+        testType countableTests (allValues :: [()]),
+        testType countableTests (allValues :: [Bool]),
+        testType countableTests ([0,3,255] :: [Word8]),
+        testType countableTests (allValues :: [Maybe ()]),
+        testType countableTests (allValues :: [Maybe Bool]),
+        testType countableTests (allValues :: [Maybe (Maybe Bool)]),
+        testType countableTests ([[],[0],[2],[-1,1],[0,0,0]] :: [[Integer]]),
+        testType countableTests' ([[1,2,1],[-5,17,112]] :: [[Integer]]),
+        testType countableTests ([[],[True,True]] :: [[Bool]]),
+        testType infiniteCountableTests ([0,1,-1,3,-7] :: [Integer]),
+        testType countableTests (allValues :: [Three -> Three]),
+        testType countableTests (allValues :: [None]),
+        testType countableTests ([[] :: [None]]),
+        testGroup "list"
+            [
+            goldenVsWriteString "Bool"    "test/count.Bool.ref"    $ \write -> checkN write 40 (Nothing :: Maybe [Bool   ]),
+            goldenVsWriteString "Word8"   "test/count.Word8.ref"   $ \write -> checkN write 40 (Nothing :: Maybe [Word8  ]),
+            goldenVsWriteString "Integer" "test/count.Integer.ref" $ \write -> checkN write 40 (Nothing :: Maybe [Integer])
+            ]
+        ];
 
     main :: IO ();
-    main = do
-    {
-        mapM_ testAllCountable (allValues :: [()]);
-        mapM_ testAllCountable (allValues :: [Bool]);
-        mapM_ testAllCountable ([0,3,255] :: [Word8]);
-        mapM_ testAllCountable (allValues :: [Maybe ()]);
-        mapM_ testAllCountable (allValues :: [Maybe Bool]);
-        mapM_ testAllCountable (allValues :: [Maybe (Maybe Bool)]);
-        mapM_ testAllCountable ([[],[0],[2],[-1,1],[0,0,0]] :: [[Integer]]);
-        mapM_ testAllCountable' ([[1,2,1],[-5,17,112]] :: [[Integer]]);
-        mapM_ testAllCountable ([[],[True,True]] :: [[Bool]]);
-        mapM_ testAllInfiniteCountable ([0,1,-1,3,-7] :: [Integer]);
-        mapM_ testAllCountable (allValues :: [Three -> Three]);
-        mapM_ testAllCountable (allValues :: [None]);
-        mapM_ testAllCountable ([[] :: [None]]);
-        putStrLn "---";
-        checkN 40 (Nothing :: Maybe [Bool]);
-        putStrLn "---";
-        checkN 40 (Nothing :: Maybe [Word8]);
-        putStrLn "---";
-        checkN 40 (Nothing :: Maybe [Integer]);
-    };
+    main = defaultMain allTests;
 }
