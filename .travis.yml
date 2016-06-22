@@ -44,11 +44,11 @@ install:
 - if [ -f configure.ac ]; then autoreconf -i; fi
 - |
   set -ex
-  stack --no-terminal --install-ghc --resolver $RESOLVER test --bench --only-dependencies
+  stack --no-terminal --install-ghc --resolver $RESOLVER test --pedantic --bench --only-dependencies
   set +ex
 
 script:
 - |
   set -ex
-  stack --no-terminal --resolver $RESOLVER test --bench --no-run-benchmarks --haddock --no-haddock-deps
+  stack --no-terminal --resolver $RESOLVER test --pedantic --bench --no-run-benchmarks --haddock --no-haddock-deps
   set +ex
