@@ -44,7 +44,7 @@ library
         ExistentialQuantification
         EmptyCase
     build-depends:
-        base >= 4.8
+        base >= 4.8 && < 5
     exposed-modules:
         Data.Expression
         Data.Searchable
@@ -62,7 +62,7 @@ test-suite tests
         GeneralizedNewtypeDeriving
         ScopedTypeVariables
     build-depends:
-        base >= 4.8,
+        base >= 4.8 && < 5,
         countable,
         bytestring,
         silently,
