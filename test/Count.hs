@@ -1,6 +1,7 @@
 module Main where
 {
     import Prelude;
+    import Data.Proxy;
     import Data.Word;
     import Test.Tasty;
     import Test.Tasty.HUnit;
@@ -9,6 +10,7 @@ module Main where
     import Data.Searchable;
     import Data.Countable;
 
+    import Show;
     import TypeName;
     import Three;
     import Golden;
@@ -70,7 +72,22 @@ module Main where
     };
 
     testType :: forall a. (TypeName a,Show a) => (a -> [TestTree]) -> [a] -> TestTree;
-    testType tests vals = testGroup (typeName vals) $ fmap (\a -> testGroup (show a) (tests a)) vals;
+    testType tests vals = testGroup (typeName (Proxy::Proxy a)) $ fmap (\a -> testGroup (show a) (tests a)) vals;
+
+    -- This is to prevent overlapping Show function instance in Text.Show.Functions,
+    -- which gets imported somehow with lts-5.
+    newtype WrapFunction a b = MkWrapFunction (a -> b) deriving (Eq,Searchable,Countable,TypeName);
+    instance (Show a,Finite a,Show b) => Show (WrapFunction a b) where
+    {
+        show (MkWrapFunction f) = showFunction f;
+    };
+    instance (Finite a,Finite b) => Finite (WrapFunction a b) where
+    {
+        allValues = fmap MkWrapFunction allValues;
+        assemble wabfx = let
+            foo abx (MkWrapFunction ab) = abx ab;
+            in fmap foo $ assemble (wabfx . MkWrapFunction);
+    };
 
     allTests :: TestTree;
     allTests = testGroup "countable"
@@ -85,7 +102,7 @@ module Main where
         testType countableTests' ([[1,2,1],[-5,17,112]] :: [[Integer]]),
         testType countableTests ([[],[True,True]] :: [[Bool]]),
         testType infiniteCountableTests ([0,1,-1,3,-7] :: [Integer]),
-        testType countableTests (allValues :: [Three -> Three]),
+        testType countableTests (allValues :: [WrapFunction Three Three]),
         testType countableTests (allValues :: [None]),
         testType countableTests ([[] :: [None]]),
         testGroup "list"

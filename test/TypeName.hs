@@ -6,7 +6,7 @@ module TypeName where
 
     class TypeName a where
     {
-        typeName :: forall proxy. proxy a -> String;
+        typeName :: Proxy a -> String;
     };
 
     instance TypeName None where

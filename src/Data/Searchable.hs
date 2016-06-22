@@ -107,7 +107,7 @@ module Data.Searchable
         ;
         allValues :: [a];
 
-        assemble :: (Applicative f) => (a -> f b) -> f (a -> b);
+        assemble :: forall b f. (Applicative f) => (a -> f b) -> f (a -> b);
         assemble afb = fmap listLookup (traverse (\a -> fmap (\b -> (a,b)) (afb a)) allValues) where
         {
             -- listLookup :: [(a,b)] -> a -> b;

@@ -59,6 +59,7 @@ test-suite tests
     default-extensions:
         ExistentialQuantification
         EmptyCase
+        GeneralizedNewtypeDeriving
         ScopedTypeVariables
     build-depends:
         base >= 4.8,
@@ -70,6 +71,7 @@ test-suite tests
         tasty-golden
     main-is: Count.hs
     other-modules:
+        Show
         TypeName
         Three
         Golden
