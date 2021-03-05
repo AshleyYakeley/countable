@@ -1,0 +1,72 @@
+name: countable
+version: "1.0"
+author: Ashley Yakeley
+copyright: (c) 2010 Ashley Yakeley
+license: BSD-3-Clause
+license-file: LICENSE
+maintainer: <ashley@semantic.org>
+homepage: "https://github.com/AshleyYakeley/countable"
+bug-reports: "https://github.com/AshleyYakeley/countable/issues"
+category: Data
+synopsis: "Countable, Searchable, Finite, Empty classes"
+description: "
+    * @class Countable@, for countable types
+    .
+    * @class AtLeastOneCountable@, for countable types that have at least one value
+    .
+    * @class InfiniteCountable@, for infinite countable types
+    .
+    * @class Searchable@, for types that can be searched over. This turns out to include some infinite types, see <http://math.andrej.com/2007/09/28/seemingly-impossible-functional-programs/>.
+    .
+    * @class Finite@, for finite types
+    .
+    * @class Empty@, for empty types
+    .
+    * @data Nothing@, an empty type
+    .
+    Some orphan instances:
+    .
+    * @(Searchable a,Eq b) => Eq (a -> b)@ / /
+    .
+    * @(Finite t) => Foldable ((->) t)@ / /
+    .
+    * @(Finite a) => Traversable ((->) a)@ / /
+    .
+    * @(Show a,Finite a,Show b) => Show (a -> b)@ / /"
+
+default-extensions:
+    - EmptyCase
+    - ExistentialQuantification
+ghc-options:
+    - -Wall
+
+library:
+    source-dirs: src
+    dependencies:
+        - base >= 4.8 && < 5
+    exposed-modules:
+        - Data.Expression
+        - Data.Searchable
+        - Data.Countable
+        - Data.Empty
+
+tests:
+    test:
+        source-dirs: test
+        default-extensions:
+            GeneralizedNewtypeDeriving
+            ScopedTypeVariables
+        dependencies:
+            - base >= 4.8 && < 5
+            - countable
+            - bytestring
+            - silently
+            - tasty
+            - tasty-hunit
+            - tasty-golden
+        main: Count.hs
+        other-modules:
+            - Show
+            - TypeName
+            - Three
+            - Golden
