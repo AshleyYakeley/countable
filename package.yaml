@@ -1,5 +1,5 @@
 name: countable
-version: "1.0"
+version: "1.1"
 author: Ashley Yakeley
 copyright: (c) 2010 Ashley Yakeley
 license: BSD-3-Clause
@@ -20,7 +20,9 @@ description: "
     .
     * @class Finite@, for finite types
     .
-    * @class Empty@, for empty types
+    * @class Singular@, for singular (n = 1) types
+    .
+    * @class Empty@, for empty (n = 0) types
     .
     * @data Nothing@, an empty type
     .
@@ -48,6 +50,7 @@ library:
         - Data.Expression
         - Data.Searchable
         - Data.Countable
+        - Data.Singular
         - Data.Empty
 
 tests:
