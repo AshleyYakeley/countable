@@ -1,66 +1,43 @@
 module Data.Empty where
-{
-    import Data.Countable;
-    import Data.Searchable;
 
-    class (Finite n) => Empty n where
-    {
-        never :: n -> a;
-    };
+import Data.Countable
+import Data.Searchable
 
-    instance (Empty a,Empty b) => Empty (Either a b) where
-    {
-        never (Left a) = never a;
-        never (Right a) = never a;
-    };
+class (Finite n) => Empty n where
+    never :: n -> a
 
-    instance (Empty a,Finite b) => Empty (a,b) where
-    {
-        never (a,_) = never a;
-    };
+instance (Empty a, Empty b) => Empty (Either a b) where
+    never (Left a) = never a
+    never (Right a) = never a
 
-    instance (AtLeastOneCountable a,Finite a,Empty b) => Empty (a -> b) where
-    {
-        never ab = never (ab countFirst);
-    };
+instance (Empty a, Finite b) => Empty (a, b) where
+    never (a, _) = never a
 
-    data None;
+instance (AtLeastOneCountable a, Finite a, Empty b) => Empty (a -> b) where
+    never ab = never (ab countFirst)
 
-    instance Countable None where
-    {
-        countPrevious = never;
-        countMaybeNext Nothing = Nothing;
-        countMaybeNext (Just n) = never n;
-    };
+data None
 
-    instance Searchable None where
-    {
-        search = finiteSearch;
-    };
+instance Countable None where
+    countPrevious = never
+    countMaybeNext Nothing = Nothing
+    countMaybeNext (Just n) = never n
 
-    instance Finite None where
-    {
-        allValues = [];
-        assemble _ = pure never;
-    };
+instance Searchable None where
+    search = finiteSearch
 
-    instance Empty None where
-    {
-        never a = case a of {};
-    };
+instance Finite None where
+    allValues = []
+    assemble _ = pure never
 
-    instance Eq None where
-    {
-        a == _b = never a;
-    };
+instance Empty None where
+    never a = case a of {}
 
-    instance Ord None where
-    {
-        a <= _b = never a;
-    };
+instance Eq None where
+    a == _b = never a
 
-    instance Show None where
-    {
-        show a = never a;
-    };
-}
+instance Ord None where
+    a <= _b = never a
+
+instance Show None where
+    show a = never a

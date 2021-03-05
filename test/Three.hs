@@ -1,34 +1,27 @@
 module Three where
-{
-    import Data.Searchable;
-    import Data.Countable;
-    import TypeName;
 
-    data Three = T1 | T2 | T3 deriving (Eq,Show);
+import Data.Countable
+import Data.Searchable
+import TypeName
 
-    instance Searchable Three where
-    {
-        search = finiteSearch;
-    };
+data Three
+    = T1
+    | T2
+    | T3
+    deriving (Eq, Show)
 
-    instance Countable Three where
-    {
-        countPrevious = finiteCountPrevious;
-        countMaybeNext = finiteCountMaybeNext;
-    };
+instance Searchable Three where
+    search = finiteSearch
 
-    instance AtLeastOneCountable Three where
-    {
-        countFirst = T1;
-    };
+instance Countable Three where
+    countPrevious = finiteCountPrevious
+    countMaybeNext = finiteCountMaybeNext
 
-    instance Finite Three where
-    {
-        allValues = [T1,T2,T3];
-    };
+instance AtLeastOneCountable Three where
+    countFirst = T1
 
-    instance TypeName Three where
-    {
-        typeName _ = "Three";
-    };
-}
+instance Finite Three where
+    allValues = [T1, T2, T3]
+
+instance TypeName Three where
+    typeName _ = "Three"

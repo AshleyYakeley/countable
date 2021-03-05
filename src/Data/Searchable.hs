@@ -1,4 +1,5 @@
 {-# OPTIONS -fno-warn-orphans #-}
+
 -- | This module also includes these orphan instances:
 --
 -- * @('Searchable' a,'Eq' b) => 'Eq' (a -> b)@ / /
@@ -9,343 +10,287 @@
 --
 -- * @('Show' a,'Finite' a,'Show' b) => 'Show' (a -> b)@ / /
 module Data.Searchable
-(
-    Searchable(..),forsome,forevery,
-    Finite(..),finiteSearch,finiteCountPrevious,finiteCountMaybeNext
-) where
-{
-    import Data.Expression;
-    import Data.Countable;
-    import Data.Monoid;
-    import Data.Maybe;
-    import Data.List;
-    import Control.Applicative;
-    import Data.Foldable hiding (find);
-    import Data.Traversable;
-    import Data.Word;
-    import Data.Int;
-    import Prelude;
+    ( Searchable(..)
+    , forsome
+    , forevery
+    , Finite(..)
+    , finiteSearch
+    , finiteCountPrevious
+    , finiteCountMaybeNext
+    ) where
 
-    -- | It turns out there are 'Searchable' instances that are not 'Finite'.
-    -- The @(c -> s)@ instance is based on the algorithm at
-    -- <http://math.andrej.com/2007/09/28/seemingly-impossible-functional-programs/>.
-    ;
-    class Searchable a where
-    {
-        search :: (a -> Maybe b) -> Maybe b;
-    };
+import Control.Applicative
+import Data.Countable
+import Data.Expression
+import Data.Foldable hiding (find)
+import Data.Int
+import Data.List
+import Data.Maybe
+import Data.Monoid
+import Data.Traversable
+import Data.Word
+import Prelude
 
-    forsome :: (Searchable a) => (a -> Bool) -> Bool;
-    forsome = isJust . search . (\ab a -> if ab a then Just () else Nothing);
+-- | It turns out there are 'Searchable' instances that are not 'Finite'.
+-- The @(c -> s)@ instance is based on the algorithm at
+-- <http://math.andrej.com/2007/09/28/seemingly-impossible-functional-programs/>.
+class Searchable a where
+    search :: (a -> Maybe b) -> Maybe b
 
-    forevery :: (Searchable a) => (a -> Bool) -> Bool;
-    forevery p = not (forsome (not . p));
+forsome :: (Searchable a) => (a -> Bool) -> Bool
+forsome =
+    isJust .
+    search .
+    (\ab a ->
+         if ab a
+             then Just ()
+             else Nothing)
 
-    instance (Searchable a) => Searchable (Maybe a) where
-    {
-        search mamb = case mamb Nothing of
-        {
-            Just b -> Just b;
-            Nothing -> search (mamb . Just);
-        };
-    };
+forevery :: (Searchable a) => (a -> Bool) -> Bool
+forevery p = not (forsome (not . p))
 
-    instance (Searchable a,Searchable b) => Searchable (Either a b) where
-    {
-        search eabb = case search (eabb . Left) of
-        {
-            Just b -> Just b;
-            _ -> search (eabb . Right);
-        }
-    };
+instance (Searchable a) => Searchable (Maybe a) where
+    search mamb =
+        case mamb Nothing of
+            Just b -> Just b
+            Nothing -> search (mamb . Just)
 
-    instance (Searchable a,Searchable b) => Searchable (a,b) where
-    {
-        search abb = search (\a -> search (\b -> abb (a,b)));
-    };
+instance (Searchable a, Searchable b) => Searchable (Either a b) where
+    search eabb =
+        case search (eabb . Left) of
+            Just b -> Just b
+            _ -> search (eabb . Right)
 
-    instance (Countable c,Searchable s) => Searchable (c -> s) where
-    {
-        search csmx = case search Just of
-        {
+instance (Searchable a, Searchable b) => Searchable (a, b) where
+    search abb = search (\a -> search (\b -> abb (a, b)))
+
+instance (Countable c, Searchable s) => Searchable (c -> s) where
+    search csmx =
+        case search Just of
             Just def -> let
-            {
-                -- prepend :: s -> (c -> s) -> c -> s;
-                prepend s cs c = case countPrevious c of
-                {
-                    Just c' -> cs c';
-                    Nothing -> s;
-                };
-
-                -- findcs :: ((c -> s) -> Maybe x) -> c -> s;
+                prepend s cs c =
+                    case countPrevious c of
+                        Just c' -> cs c'
+                        Nothing -> s
+                -- | prepend :: s -> (c -> s) -> c -> s
+                -- | findcs :: ((c -> s) -> Maybe x) -> c -> s
                 findcs csm = let
-                {
-                    mx = search (\s' -> do
-                    {
-                        _ <- search (csm . (prepend s'));
-                        return s';
-                    });
-                    s = case mx of
-                    {
-                        Just s' -> s';
-                        _ -> def;
-                    };
-                } in prepend s (findcs (csm . (prepend s)));
-            } in csmx (findcs csmx);
-            Nothing -> Nothing;
-        };
-    };
+                    mx =
+                        search
+                            (\s' -> do
+                                 _ <- search (csm . (prepend s'))
+                                 return s')
+                    s =
+                        case mx of
+                            Just s' -> s'
+                            _ -> def
+                    in prepend s (findcs (csm . (prepend s)))
+                in csmx (findcs csmx)
+            Nothing -> Nothing
 
-    instance (Searchable a,Eq b) => Eq (a -> b) where
-    {
-        p == q = forevery (\a -> p a == q a);
-    };
+instance (Searchable a, Eq b) => Eq (a -> b) where
+    p == q = forevery (\a -> p a == q a)
 
-    class (Searchable a,Countable a) => Finite a where
-    {
-        -- | Not necessarily in counting order.
-        ;
-        allValues :: [a];
+class (Searchable a, Countable a) => Finite a where
+    -- | Not necessarily in counting order.
+    allValues :: [a]
+    assemble ::
+           forall b f. (Applicative f)
+        => (a -> f b)
+        -> f (a -> b)
+    assemble afb = fmap listLookup (traverse (\a -> fmap (\b -> (a, b)) (afb a)) allValues)
+      where
+        -- listLookup :: [(a,b)] -> a -> b;
+        listLookup [] _ = error "missing value" -- this should never happen
+        listLookup ((a, b):_) a'
+            | a == a' = b
+        listLookup (_:l) a' = listLookup l a'
 
-        assemble :: forall b f. (Applicative f) => (a -> f b) -> f (a -> b);
-        assemble afb = fmap listLookup (traverse (\a -> fmap (\b -> (a,b)) (afb a)) allValues) where
-        {
-            -- listLookup :: [(a,b)] -> a -> b;
-            listLookup [] _ = error "missing value";    -- this should never happen
-            listLookup ((a,b):_) a' | a == a' = b;
-            listLookup (_:l) a' = listLookup l a';
-        };
-    };
+instance (Finite t) => Foldable ((->) t) where
+    foldMap am ta = mconcat (fmap (am . ta) allValues)
 
-    instance (Finite t) => Foldable ((->) t) where
-    {
-        foldMap am ta = mconcat (fmap (am . ta) allValues);
-    };
+instance (Finite a) => Traversable ((->) a) where
+    sequenceA = assemble
 
-    instance (Finite a) => Traversable ((->) a) where
-    {
-        sequenceA = assemble;
-    };
+firstJust :: [Maybe a] -> Maybe a
+firstJust [] = Nothing
+firstJust ((Just a):_) = Just a
+firstJust (Nothing:mas) = firstJust mas
 
-    firstJust :: [Maybe a] -> Maybe a;
-    firstJust [] = Nothing;
-    firstJust ((Just a):_) = Just a;
-    firstJust (Nothing:mas) = firstJust mas;
+finiteSearch :: (Finite a) => (a -> Maybe b) -> Maybe b
+finiteSearch p = firstJust (fmap p allValues)
 
-    finiteSearch :: (Finite a) => (a -> Maybe b) -> Maybe b;
-    finiteSearch p = firstJust (fmap p allValues);
+finiteCountPrevious :: (Finite a) => a -> Maybe a
+finiteCountPrevious x = findp Nothing allValues
+  where
+    findp ma (a:_)
+        | a == x = ma
+    findp _ (a:as) = findp (Just a) as
+    findp _ [] = seq x (error "missing value")
 
-    finiteCountPrevious :: (Finite a) => a -> Maybe a;
-    finiteCountPrevious x = findp Nothing allValues where
-    {
-        findp ma (a:_) | a == x = ma;
-        findp _ (a:as) = findp (Just a) as;
-        findp _ [] = seq x (error "missing value");
-    };
+firstItem :: [a] -> Maybe a
+firstItem [] = Nothing
+firstItem (a:_) = Just a
 
-    firstItem :: [a] -> Maybe a;
-    firstItem [] = Nothing;
-    firstItem (a:_) = Just a;
+finiteCountMaybeNext :: (Finite a) => Maybe a -> Maybe a
+finiteCountMaybeNext Nothing = firstItem allValues
+finiteCountMaybeNext (Just x) = findmn allValues
+  where
+    findmn (a:as)
+        | x == a = firstItem as
+    findmn (_:as) = findmn as
+    findmn [] = seq x (error "missing value")
 
-    finiteCountMaybeNext :: (Finite a) => Maybe a -> Maybe a;
-    finiteCountMaybeNext Nothing = firstItem allValues;
-    finiteCountMaybeNext (Just x) = findmn allValues where
-    {
-        findmn (a:as) | x == a = firstItem as;
-        findmn (_:as) = findmn as;
-        findmn [] = seq x (error "missing value");
-    };
+instance Searchable () where
+    search = finiteSearch
 
-    instance Searchable () where
-    {
-        search = finiteSearch;
-    };
+instance Finite () where
+    allValues = [()]
+    assemble afb = liftA (\v _ -> v) (afb ())
 
-    instance Finite () where
-    {
-        allValues = [()];
-        assemble afb = liftA (\v _ -> v) (afb ());
-    };
+instance Searchable Bool where
+    search = finiteSearch
 
-    instance Searchable Bool where
-    {
-        search = finiteSearch;
-    };
+instance Finite Bool where
+    allValues = [False, True]
+    assemble afb =
+        liftA2
+            (\f t x ->
+                 if x
+                     then t
+                     else f)
+            (afb False)
+            (afb True)
 
-    instance Finite Bool where
-    {
-        allValues = [False,True];
-        assemble afb = liftA2 (\f t x -> if x then t else f) (afb False) (afb True);
-    };
+instance Searchable Word8 where
+    search = finiteSearch
 
-    instance Searchable Word8 where
-    {
-        search = finiteSearch;
-    };
+instance Finite Word8 where
+    allValues = enumFrom minBound
 
-    instance Finite Word8 where
-    {
-        allValues = enumFrom minBound;
-    };
+instance Searchable Word16 where
+    search = finiteSearch
 
-    instance Searchable Word16 where
-    {
-        search = finiteSearch;
-    };
+instance Finite Word16 where
+    allValues = enumFrom minBound
 
-    instance Finite Word16 where
-    {
-        allValues = enumFrom minBound;
-    };
+instance Searchable Word32 where
+    search = finiteSearch
 
-    instance Searchable Word32 where
-    {
-        search = finiteSearch;
-    };
+instance Finite Word32 where
+    allValues = enumFrom minBound
 
-    instance Finite Word32 where
-    {
-        allValues = enumFrom minBound;
-    };
+instance Searchable Word64 where
+    search = finiteSearch
 
-    instance Searchable Word64 where
-    {
-        search = finiteSearch;
-    };
+instance Finite Word64 where
+    allValues = enumFrom minBound
 
-    instance Finite Word64 where
-    {
-        allValues = enumFrom minBound;
-    };
+instance Searchable Int8 where
+    search = finiteSearch
 
-    instance Searchable Int8 where
-    {
-        search = finiteSearch;
-    };
+instance Finite Int8 where
+    allValues = enumFrom minBound
 
-    instance Finite Int8 where
-    {
-        allValues = enumFrom minBound;
-    };
+instance Searchable Int16 where
+    search = finiteSearch
 
-    instance Searchable Int16 where
-    {
-        search = finiteSearch;
-    };
+instance Finite Int16 where
+    allValues = enumFrom minBound
 
-    instance Finite Int16 where
-    {
-        allValues = enumFrom minBound;
-    };
+instance Searchable Int32 where
+    search = finiteSearch
 
-    instance Searchable Int32 where
-    {
-        search = finiteSearch;
-    };
+instance Finite Int32 where
+    allValues = enumFrom minBound
 
-    instance Finite Int32 where
-    {
-        allValues = enumFrom minBound;
-    };
+instance Searchable Int64 where
+    search = finiteSearch
 
-    instance Searchable Int64 where
-    {
-        search = finiteSearch;
-    };
+instance Finite Int64 where
+    allValues = enumFrom minBound
 
-    instance Finite Int64 where
-    {
-        allValues = enumFrom minBound;
-    };
+instance (Finite a) => Finite (Maybe a) where
+    allValues = Nothing : (fmap Just allValues)
+    assemble mafb = liftA2 maybe (mafb Nothing) (assemble (mafb . Just))
 
-    instance (Finite a) => Finite (Maybe a) where
-    {
-        allValues = Nothing:(fmap Just allValues);
-        assemble mafb = liftA2 maybe (mafb Nothing) (assemble (mafb . Just));
-    };
+instance (Finite a, Finite b) => Finite (Either a b) where
+    allValues = (fmap Left allValues) ++ (fmap Right allValues)
+    assemble eabfr = liftA2 either (assemble (eabfr . Left)) (assemble (eabfr . Right))
 
-    instance (Finite a,Finite b) => Finite (Either a b) where
-    {
-        allValues = (fmap Left allValues) ++ (fmap Right allValues);
-        assemble eabfr = liftA2 either (assemble (eabfr . Left)) (assemble (eabfr . Right));
-    };
+instance (Finite a, Finite b) => Finite (a, b) where
+    allValues = liftA2 (,) allValues allValues
+    assemble abfr = fmap (\abr (a, b) -> abr a b) (assemble (\a -> assemble (\b -> abfr (a, b))))
 
-    instance (Finite a,Finite b) => Finite (a,b) where
-    {
-        allValues = liftA2 (,) allValues allValues;
-        assemble abfr = fmap (\abr (a,b) -> abr a b) (assemble (\a -> assemble (\b -> abfr (a,b))));
-    };
+setpair :: (Eq a) => (a, b) -> (a -> b) -> (a -> b)
+setpair (a', b') _ a
+    | a == a' = b'
+setpair _ ab a = ab a
 
-    setpair :: (Eq a) => (a,b) -> (a -> b) -> (a -> b);
-    setpair (a',b') _ a | a == a' = b';
-    setpair _ ab a = ab a;
+data IsoCountable x =
+    forall l. (Countable l) =>
+                  MkIsoCountable (x -> l)
+                                 (l -> x)
 
-    data IsoCountable x = forall l. (Countable l) => MkIsoCountable (x -> l) (l -> x);
-
-    isoCountableFn :: (Finite a,Countable b) => IsoCountable (a -> b);
-    isoCountableFn = makeFromList allValues where
-    {
-        makeFromList :: (Eq a,Countable b) => [a] -> IsoCountable (a -> b);
-        makeFromList [] = MkIsoCountable (\_ -> ()) (\a -> seq a undefined);
-        makeFromList (a:as) = case makeFromList as of
-        {
+isoCountableFn :: (Finite a, Countable b) => IsoCountable (a -> b)
+isoCountableFn = makeFromList allValues
+  where
+    makeFromList :: (Eq a, Countable b) => [a] -> IsoCountable (a -> b)
+    makeFromList [] = MkIsoCountable (\_ -> ()) (\a -> seq a undefined)
+    makeFromList (a:as) =
+        case makeFromList as of
             MkIsoCountable encode decode ->
-             MkIsoCountable (\ab -> (ab a,encode ab)) (\(b,l) -> setpair (a,b) (decode l));
-        };
-    };
+                MkIsoCountable (\ab -> (ab a, encode ab)) (\(b, l) -> setpair (a, b) (decode l))
 
-    instance (Finite a,Countable b) => Countable (a -> b) where
-    {
-        countPrevious = case isoCountableFn of
-        {
-            MkIsoCountable encode decode -> (fmap decode) . countPrevious . encode;
-        };
-        countMaybeNext = case isoCountableFn of
-        {
-            MkIsoCountable encode decode -> (fmap decode) . countMaybeNext . (fmap encode);
-        };
-    };
+instance (Finite a, Countable b) => Countable (a -> b) where
+    countPrevious =
+        case isoCountableFn of
+            MkIsoCountable encode decode -> (fmap decode) . countPrevious . encode
+    countMaybeNext =
+        case isoCountableFn of
+            MkIsoCountable encode decode -> (fmap decode) . countMaybeNext . (fmap encode)
 
-    instance (Finite a,AtLeastOneCountable b) => AtLeastOneCountable (a -> b) where
-    {
-        countFirst = \_ -> countFirst;
-    };
+instance (Finite a, AtLeastOneCountable b) => AtLeastOneCountable (a -> b) where
+    countFirst = \_ -> countFirst
 
-    data IsoInfiniteCountable x = forall l. (InfiniteCountable l) => MkIsoInfiniteCountable (x -> l) (l -> x);
+data IsoInfiniteCountable x =
+    forall l. (InfiniteCountable l) =>
+                  MkIsoInfiniteCountable (x -> l)
+                                         (l -> x)
 
-    isoInfiniteCountableFn :: (Finite a,AtLeastOneCountable a,InfiniteCountable b) => IsoInfiniteCountable (a -> b);
-    isoInfiniteCountableFn = makeFromList allValues where
-    {
-        makeFromList :: (Eq a,InfiniteCountable b) => [a] -> IsoInfiniteCountable (a -> b);
-        makeFromList [] = undefined;
-        makeFromList [a] = MkIsoInfiniteCountable (\ab -> ab a) (\b -> setpair (a,b) (\a' -> seq a' undefined));
-        makeFromList (a:as) = case makeFromList as of
-        {
+isoInfiniteCountableFn :: (Finite a, AtLeastOneCountable a, InfiniteCountable b) => IsoInfiniteCountable (a -> b)
+isoInfiniteCountableFn = makeFromList allValues
+  where
+    makeFromList :: (Eq a, InfiniteCountable b) => [a] -> IsoInfiniteCountable (a -> b)
+    makeFromList [] = undefined
+    makeFromList [a] = MkIsoInfiniteCountable (\ab -> ab a) (\b -> setpair (a, b) (\a' -> seq a' undefined))
+    makeFromList (a:as) =
+        case makeFromList as of
             MkIsoInfiniteCountable encode decode ->
-             MkIsoInfiniteCountable (\ab -> (ab a,encode ab)) (\(b,l) -> setpair (a,b) (decode l));
-        };
-    };
+                MkIsoInfiniteCountable (\ab -> (ab a, encode ab)) (\(b, l) -> setpair (a, b) (decode l))
 
-    instance (Finite a,AtLeastOneCountable a,InfiniteCountable b) => InfiniteCountable (a -> b) where
-    {
-        countNext = case isoInfiniteCountableFn of
-        {
-            MkIsoInfiniteCountable encode decode -> decode . countNext . (fmap encode);
-        };
-    };
+instance (Finite a, AtLeastOneCountable a, InfiniteCountable b) => InfiniteCountable (a -> b) where
+    countNext =
+        case isoInfiniteCountableFn of
+            MkIsoInfiniteCountable encode decode -> decode . countNext . (fmap encode)
 
-    instance (Finite a,Finite b) => Finite (a -> b) where
-    {
-        allValues = sequenceA (\_ -> allValues);
-        assemble abfr = runValueExpression (Data.Foldable.foldr assemble1 (\ab -> ClosedExpression (abfr ab)) allValues (\_ -> error "missing value")) where
-        {
+instance (Finite a, Finite b) => Finite (a -> b) where
+    allValues = sequenceA (\_ -> allValues)
+    assemble abfr =
+        runValueExpression
+            (Data.Foldable.foldr assemble1 (\ab -> ClosedExpression (abfr ab)) allValues (\_ -> error "missing value"))
+      where
             -- assemble1 :: a -> ((a -> b) -> Expression a b f r) -> (a -> b) -> Expression a b f r
-            assemble1 a0 aber x = OpenExpression a0 (assemble (\b0 -> aber (\a -> if a == a0 then b0 else x a)))
-        };
-    };
+        assemble1 a0 aber x =
+            OpenExpression
+                a0
+                (assemble
+                     (\b0 ->
+                          aber
+                              (\a ->
+                                   if a == a0
+                                       then b0
+                                       else x a)))
 
-    instance (Show a,Finite a,Show b) => Show (a -> b) where
-    {
-        show f = "{" ++ (intercalate "," (fmap (\a -> (show a) ++ "->" ++ (show (f a))) allValues)) ++ "}";
-    };
-}
+instance (Show a, Finite a, Show b) => Show (a -> b) where
+    show f = "{" ++ (intercalate "," (fmap (\a -> (show a) ++ "->" ++ (show (f a))) allValues)) ++ "}"

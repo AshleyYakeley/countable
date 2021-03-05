@@ -1,2 +1,8 @@
 packages: [.]
 resolver: lts-17.5
+
+extra-deps:
+- git: https://github.com/AshleyYakeley/haskell-src-exts.git
+  commit: 0f5103dd6fbea4f7ee8b156b40c7782e989e7025
+- git: https://github.com/AshleyYakeley/hindent.git
+  commit: 9023e5da7245a802fa115a5e616f8beca0c9ffcf

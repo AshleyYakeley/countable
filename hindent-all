@@ -1,0 +1,7 @@
+#!/bin/bash -e
+stack build hindent
+BINPATH=`stack path --local-bin`
+for f in `find -name '*.hs' -not -path '*.stack-work/*'`
+do
+    ${BINPATH}/hindent $f || exit
+done
