@@ -28,6 +28,7 @@ import Data.List
 import Data.Maybe
 import Data.Monoid
 import Data.Traversable
+import Data.Void
 import Data.Word
 import Prelude
 
@@ -140,6 +141,13 @@ finiteCountMaybeNext (Just x) = findmn allValues
         | x == a = firstItem as
     findmn (_:as) = findmn as
     findmn [] = seq x (error "missing value")
+
+instance Searchable Void where
+    search = finiteSearch
+
+instance Finite Void where
+    allValues = []
+    assemble _ = pure absurd
 
 instance Searchable () where
     search = finiteSearch

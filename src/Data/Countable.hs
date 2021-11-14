@@ -1,6 +1,7 @@
 module Data.Countable where
 
 import Data.Int
+import Data.Void
 import Data.Word
 import Prelude
 
@@ -13,6 +14,11 @@ countDown a =
     case countPrevious a of
         Just a' -> a' : (countDown a')
         Nothing -> []
+
+instance Countable Void where
+    countPrevious = absurd
+    countMaybeNext Nothing = Nothing
+    countMaybeNext (Just n) = absurd n
 
 instance Countable () where
     countPrevious () = Nothing

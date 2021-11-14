@@ -1,14 +1,14 @@
 module TypeName where
 
-import Data.Empty
 import Data.Proxy
+import Data.Void
 import Data.Word
 
 class TypeName a where
     typeName :: Proxy a -> String
 
-instance TypeName None where
-    typeName _ = "None"
+instance TypeName Void where
+    typeName _ = "Void"
 
 instance TypeName () where
     typeName _ = "()"

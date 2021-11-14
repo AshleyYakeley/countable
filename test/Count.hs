@@ -1,13 +1,13 @@
 module Main where
 
 import Data.Proxy
+import Data.Void
 import Data.Word
 import Prelude
 import Test.Tasty
 import Test.Tasty.HUnit
 
 import Data.Countable
-import Data.Empty
 import Data.Searchable
 
 import Golden
@@ -102,8 +102,8 @@ allTests =
         , testType countableTests ([[], [True, True]] :: [[Bool]])
         , testType infiniteCountableTests ([0, 1, -1, 3, -7] :: [Integer])
         , testType countableTests (allValues :: [WrapFunction Three Three])
-        , testType countableTests (allValues :: [None])
-        , testType countableTests ([[] :: [None]])
+        , testType countableTests (allValues :: [Void])
+        , testType countableTests ([[] :: [Void]])
         , testGroup
               "list"
               [ goldenVsWriteString "Bool" "test/count.Bool.ref" $ \write -> checkN write 40 (Nothing :: Maybe [Bool])
