@@ -45,7 +45,7 @@ ghc-options:
 library:
     source-dirs: src
     dependencies:
-        - base >= 4.15
+        - base >= 4.15 && < 5
     exposed-modules:
         - Data.Searchable
         - Data.Countable
@@ -61,7 +61,7 @@ tests:
             GeneralizedNewtypeDeriving
             ScopedTypeVariables
         dependencies:
-            - base >= 4.15
+            - base >= 4.15 && < 5
             - countable
             - bytestring
             - silently
