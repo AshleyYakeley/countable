@@ -47,11 +47,12 @@ library:
     dependencies:
         - base >= 4.8 && < 5
     exposed-modules:
-        - Data.Expression
         - Data.Searchable
         - Data.Countable
         - Data.Singular
         - Data.Empty
+    other-modules:
+        - Data.Expression
 
 tests:
     test:
