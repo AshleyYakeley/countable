@@ -1,7 +1,7 @@
 name: countable
-version: "1.1"
+version: "1.1.0.1"
 author: Ashley Yakeley
-copyright: (c) 2010 Ashley Yakeley
+copyright: (c) 2010-2022 Ashley Yakeley
 license: BSD-3-Clause
 license-file: LICENSE
 maintainer: <ashley@semantic.org>
@@ -9,7 +9,7 @@ homepage: "https://github.com/AshleyYakeley/countable"
 bug-reports: "https://github.com/AshleyYakeley/countable/issues"
 category: Data
 synopsis: "Countable, Searchable, Finite, Empty classes"
-description: "
+description: |
     * @class Countable@, for countable types
     .
     * @class AtLeastOneCountable@, for countable types that have at least one value
@@ -34,7 +34,10 @@ description: "
     .
     * @(Finite a) => Traversable ((->) a)@ / /
     .
-    * @(Show a,Finite a,Show b) => Show (a -> b)@ / /"
+    * @(Show a,Finite a,Show b) => Show (a -> b)@ / /
+
+extra-source-files:
+    - changelog.md
 
 default-extensions:
     - EmptyCase
