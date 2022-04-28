@@ -5,7 +5,8 @@ import Data.Void
 import Data.Word
 import Prelude
 
-class (Eq a) => Countable a where
+-- | Values form a possibly empty, possibly finite, countable sequence.
+class Eq a => Countable a where
     countPrevious :: a -> Maybe a
     countMaybeNext :: Maybe a -> Maybe a
 
@@ -174,7 +175,8 @@ instance (Countable a, Countable b) => Countable (a, b) where
                                Just b'' -> Just (a', b'')
                                Nothing -> Nothing
 
-class (Countable a) => AtLeastOneCountable a where
+-- | Values form a non-empty, possibly finite, countable sequence.
+class Countable a => AtLeastOneCountable a where
     countFirst :: a
 
 instance AtLeastOneCountable () where
@@ -219,6 +221,7 @@ instance (Countable a, AtLeastOneCountable b) => AtLeastOneCountable (Either a b
 instance (AtLeastOneCountable a, AtLeastOneCountable b) => AtLeastOneCountable (a, b) where
     countFirst = (countFirst, countFirst)
 
+-- | Values form an infinite countable sequence.
 class (AtLeastOneCountable a) => InfiniteCountable a where
     countNext :: Maybe a -> a
 

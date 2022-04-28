@@ -92,6 +92,7 @@ instance (Countable c, Searchable s) => Searchable (c -> s) where
 instance (Searchable a, Eq b) => Eq (a -> b) where
     p == q = forevery (\a -> p a == q a)
 
+-- | There are a finite number of values (possibly zero).
 class (Searchable a, Countable a) => Finite a where
     -- | Not necessarily in counting order.
     allValues :: [a]

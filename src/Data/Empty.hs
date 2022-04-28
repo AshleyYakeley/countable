@@ -4,7 +4,8 @@ import Data.Countable
 import Data.Searchable
 import Data.Void
 
-class (Finite n) => Empty n where
+-- | There are no values.
+class Finite n => Empty n where
     never :: n -> a
 
 instance Empty Void where
