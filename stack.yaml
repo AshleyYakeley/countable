@@ -1,5 +1,5 @@
 packages: [.]
-resolver: lts-19.0
+resolver: lts-19.5
 
 extra-deps:
 - git: https://github.com/AshleyYakeley/haskell-src-exts.git
