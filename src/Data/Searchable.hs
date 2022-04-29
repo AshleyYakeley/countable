@@ -1,14 +1,3 @@
-{-# OPTIONS -fno-warn-orphans #-}
-
--- | This module also includes these orphan instances:
---
--- * @('Searchable' a,'Eq' b) => 'Eq' (a -> b)@ / /
---
--- * @('Finite' t) => 'Foldable' ((->) t)@ / /
---
--- * @('Finite' a) => 'Traversable' ((->) a)@ / /
---
--- * @('Show' a,'Finite' a,'Show' b) => 'Show' (a -> b)@ / /
 module Data.Searchable
     ( Searchable(..)
     , forsome
@@ -21,12 +10,9 @@ module Data.Searchable
 
 import Control.Applicative
 import Data.Countable
-import Data.Expression
-import Data.Foldable hiding (find)
 import Data.Int
 import Data.List
 import Data.Maybe
-import Data.Monoid
 import Data.Traversable
 import Data.Void
 import Data.Word
@@ -89,9 +75,6 @@ instance (Countable c, Searchable s) => Searchable (c -> s) where
                 in csmx (findcs csmx)
             Nothing -> Nothing
 
-instance (Searchable a, Eq b) => Eq (a -> b) where
-    p == q = forevery (\a -> p a == q a)
-
 -- | There are a finite number of values (possibly zero).
 class (Searchable a, Countable a) => Finite a where
     -- | Not necessarily in counting order.
@@ -107,12 +90,6 @@ class (Searchable a, Countable a) => Finite a where
         listLookup ((a, b):_) a'
             | a == a' = b
         listLookup (_:l) a' = listLookup l a'
-
-instance (Finite t) => Foldable ((->) t) where
-    foldMap am ta = mconcat (fmap (am . ta) allValues)
-
-instance (Finite a) => Traversable ((->) a) where
-    sequenceA = assemble
 
 firstJust :: [Maybe a] -> Maybe a
 firstJust [] = Nothing
@@ -230,76 +207,3 @@ instance (Finite a, Finite b) => Finite (Either a b) where
 instance (Finite a, Finite b) => Finite (a, b) where
     allValues = liftA2 (,) allValues allValues
     assemble abfr = fmap (\abr (a, b) -> abr a b) (assemble (\a -> assemble (\b -> abfr (a, b))))
-
-setpair :: (Eq a) => (a, b) -> (a -> b) -> (a -> b)
-setpair (a', b') _ a
-    | a == a' = b'
-setpair _ ab a = ab a
-
-data IsoCountable x =
-    forall l. (Countable l) =>
-                  MkIsoCountable (x -> l)
-                                 (l -> x)
-
-isoCountableFn :: (Finite a, Countable b) => IsoCountable (a -> b)
-isoCountableFn = makeFromList allValues
-  where
-    makeFromList :: (Eq a, Countable b) => [a] -> IsoCountable (a -> b)
-    makeFromList [] = MkIsoCountable (\_ -> ()) (\a -> seq a undefined)
-    makeFromList (a:as) =
-        case makeFromList as of
-            MkIsoCountable encode decode ->
-                MkIsoCountable (\ab -> (ab a, encode ab)) (\(b, l) -> setpair (a, b) (decode l))
-
-instance (Finite a, Countable b) => Countable (a -> b) where
-    countPrevious =
-        case isoCountableFn of
-            MkIsoCountable encode decode -> (fmap decode) . countPrevious . encode
-    countMaybeNext =
-        case isoCountableFn of
-            MkIsoCountable encode decode -> (fmap decode) . countMaybeNext . (fmap encode)
-
-instance (Finite a, AtLeastOneCountable b) => AtLeastOneCountable (a -> b) where
-    countFirst = \_ -> countFirst
-
-data IsoInfiniteCountable x =
-    forall l. (InfiniteCountable l) =>
-                  MkIsoInfiniteCountable (x -> l)
-                                         (l -> x)
-
-isoInfiniteCountableFn :: (Finite a, AtLeastOneCountable a, InfiniteCountable b) => IsoInfiniteCountable (a -> b)
-isoInfiniteCountableFn = makeFromList allValues
-  where
-    makeFromList :: (Eq a, InfiniteCountable b) => [a] -> IsoInfiniteCountable (a -> b)
-    makeFromList [] = undefined
-    makeFromList [a] = MkIsoInfiniteCountable (\ab -> ab a) (\b -> setpair (a, b) (\a' -> seq a' undefined))
-    makeFromList (a:as) =
-        case makeFromList as of
-            MkIsoInfiniteCountable encode decode ->
-                MkIsoInfiniteCountable (\ab -> (ab a, encode ab)) (\(b, l) -> setpair (a, b) (decode l))
-
-instance (Finite a, AtLeastOneCountable a, InfiniteCountable b) => InfiniteCountable (a -> b) where
-    countNext =
-        case isoInfiniteCountableFn of
-            MkIsoInfiniteCountable encode decode -> decode . countNext . (fmap encode)
-
-instance (Finite a, Finite b) => Finite (a -> b) where
-    allValues = sequenceA (\_ -> allValues)
-    assemble abfr =
-        runValueExpression
-            (Data.Foldable.foldr assemble1 (\ab -> ClosedExpression (abfr ab)) allValues (\_ -> error "missing value"))
-      where
-            -- assemble1 :: a -> ((a -> b) -> Expression a b f r) -> (a -> b) -> Expression a b f r
-        assemble1 a0 aber x =
-            OpenExpression
-                a0
-                (assemble
-                     (\b0 ->
-                          aber
-                              (\a ->
-                                   if a == a0
-                                       then b0
-                                       else x a)))
-
-instance (Show a, Finite a, Show b) => Show (a -> b) where
-    show f = "{" ++ (intercalate "," (fmap (\a -> (show a) ++ "->" ++ (show (f a))) allValues)) ++ "}"

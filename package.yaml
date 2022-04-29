@@ -1,5 +1,5 @@
 name: countable
-version: "1.1.0.1"
+version: "1.2"
 author: Ashley Yakeley
 copyright: (c) 2010-2022 Ashley Yakeley
 license: BSD-3-Clause
@@ -26,13 +26,13 @@ description: |
     .
     * @data Nothing@, an empty type
     .
-    Some orphan instances:
+    Some orphan instances (in their own modules):
     .
     * @(Searchable a,Eq b) => Eq (a -> b)@ / /
     .
-    * @(Finite t) => Foldable ((->) t)@ / /
+    * @Finite t => Foldable ((->) t)@ / /
     .
-    * @(Finite a) => Traversable ((->) a)@ / /
+    * @Finite a => Traversable ((->) a)@ / /
     .
     * @(Show a,Finite a,Show b) => Show (a -> b)@ / /
 
@@ -54,6 +54,10 @@ library:
         - Data.Countable
         - Data.Singular
         - Data.Empty
+        - Data.Function.Eq
+        - Data.Function.Foldable
+        - Data.Function.Traversable
+        - Data.Function.Show
     other-modules:
         - Data.Expression
 

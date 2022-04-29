@@ -8,6 +8,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Data.Countable
+import Data.Function.Eq ()
 import Data.Searchable
 
 import Golden

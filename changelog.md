@@ -1,3 +1,6 @@
+## [1.2] - 2022-04-28
+- orphan instances in separate modules
+
 ## [1.1] - 2022-04-28
 - removed None type (use Void instead)
 - new Singular class
