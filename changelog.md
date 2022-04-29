@@ -1,4 +1,4 @@
-## [1.2] - 2022-04-28
+## [1.2] - 2022-04-29
 - orphan instances in separate modules
 
 ## [1.1] - 2022-04-28
