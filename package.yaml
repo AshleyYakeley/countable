@@ -24,8 +24,6 @@ description: |
     .
     * @class Empty@, for empty (n = 0) types
     .
-    * @data Nothing@, an empty type
-    .
     Some orphan instances (in their own modules):
     .
     * @(Searchable a,Eq b) => Eq (a -> b)@ / /
