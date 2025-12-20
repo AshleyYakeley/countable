@@ -11,6 +11,7 @@ import Data.Foldable hiding (find)
 import Data.Function.Traversable ()
 import Data.Searchable
 import Data.Traversable
+import Data.Subsingular
 import Prelude
 
 instance (Searchable a, Eq b) => Eq (a -> b) where
@@ -85,6 +86,9 @@ instance (Finite a, Finite b) => Finite (a -> b) where
                                    if a == a0
                                        then b0
                                        else x a)))
+
+instance (Finite a, Subsingular b) => Subsingular (a -> b) where
+    subsingle = assemble $ \_ -> subsingle
 
 instance (AtLeastOneCountable a, Finite a, Empty b) => Empty (a -> b) where
     never ab = never (ab countFirst)

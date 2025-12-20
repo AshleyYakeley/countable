@@ -48,7 +48,7 @@ instance (Searchable a, Searchable b) => Searchable (Either a b) where
             Just b -> Just b
             _ -> search (eabb . Right)
 
-instance (Searchable a, Searchable b) => Searchable (a, b) where
+instance {-# OVERLAPPABLE #-} (Searchable a, Searchable b) => Searchable (a, b) where
     search abb = search (\a -> search (\b -> abb (a, b)))
 
 instance (Countable c, Searchable s) => Searchable (c -> s) where

@@ -1,10 +1,10 @@
 module Data.Singular where
 
 import Data.Countable
-import Data.Searchable
+import Data.Subsingular
 
 -- | There is exactly one value.
-class (Finite a, AtLeastOneCountable a) => Singular a where
+class (Subsingular a, AtLeastOneCountable a) => Singular a where
     single :: a
 
 instance Singular () where
