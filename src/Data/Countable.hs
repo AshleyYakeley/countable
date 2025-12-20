@@ -76,6 +76,10 @@ instance Countable Int64 where
     countPrevious = boundedCountPrevious
     countMaybeNext = boundedCountMaybeNext
 
+instance Countable Char where
+    countPrevious = boundedCountPrevious
+    countMaybeNext = boundedCountMaybeNext
+
 instance Countable Integer where
     countPrevious 0 = Nothing
     countPrevious a

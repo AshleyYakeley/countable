@@ -203,6 +203,12 @@ instance Searchable Int64 where
 instance Finite Int64 where
     allValues = enumFrom minBound
 
+instance Searchable Char where
+    search = finiteSearch
+
+instance Finite Char where
+    allValues = enumFrom minBound
+
 instance Finite a => Finite (Maybe a) where
     allValues = Nothing : (fmap Just allValues)
     assemble mafb = liftA2 maybe (mafb Nothing) (assemble (mafb . Just))
