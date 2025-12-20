@@ -1,15 +1,15 @@
 module Data.Searchable
-    ( Searchable(..)
+    ( Searchable (..)
     , forsome
     , forevery
-    , Finite(..)
+    , Finite (..)
     , finiteSearch
     , finiteCountPrevious
     , finiteCountMaybeNext
-    ) where
+    )
+where
 
 import Control.Applicative
-import Data.Countable
 import Data.Int
 import Data.List
 import Data.Maybe
@@ -18,25 +18,28 @@ import Data.Void
 import Data.Word
 import Prelude
 
+import Data.Countable
+
 -- | It turns out there are 'Searchable' instances that are not 'Finite'.
 -- The @(c -> s)@ instance is based on the algorithm at
 -- <http://math.andrej.com/2007/09/28/seemingly-impossible-functional-programs/>.
 class Searchable a where
     search :: (a -> Maybe b) -> Maybe b
 
-forsome :: (Searchable a) => (a -> Bool) -> Bool
+forsome :: Searchable a => (a -> Bool) -> Bool
 forsome =
-    isJust .
-    search .
-    (\ab a ->
-         if ab a
-             then Just ()
-             else Nothing)
+    isJust
+        . search
+        . ( \ab a ->
+                if ab a
+                    then Just ()
+                    else Nothing
+          )
 
-forevery :: (Searchable a) => (a -> Bool) -> Bool
+forevery :: Searchable a => (a -> Bool) -> Bool
 forevery p = not (forsome (not . p))
 
-instance (Searchable a) => Searchable (Maybe a) where
+instance Searchable a => Searchable (Maybe a) where
     search mamb =
         case mamb Nothing of
             Just b -> Just b
@@ -59,14 +62,15 @@ instance (Countable c, Searchable s) => Searchable (c -> s) where
                     case countPrevious c of
                         Just c' -> cs c'
                         Nothing -> s
-                -- | prepend :: s -> (c -> s) -> c -> s
-                -- | findcs :: ((c -> s) -> Maybe x) -> c -> s
+                -- \| prepend :: s -> (c -> s) -> c -> s
+                -- \| findcs :: ((c -> s) -> Maybe x) -> c -> s
                 findcs csm = let
                     mx =
                         search
-                            (\s' -> do
-                                 _ <- search (csm . (prepend s'))
-                                 return s')
+                            ( \s' -> do
+                                _ <- search (csm . (prepend s'))
+                                return s'
+                            )
                     s =
                         case mx of
                             Just s' -> s'
@@ -79,46 +83,48 @@ instance (Countable c, Searchable s) => Searchable (c -> s) where
 class (Searchable a, Countable a) => Finite a where
     -- | Not necessarily in counting order.
     allValues :: [a]
+
     assemble ::
-           forall b f. (Applicative f)
-        => (a -> f b)
-        -> f (a -> b)
+        forall b f.
+        Applicative f =>
+        (a -> f b) ->
+        f (a -> b)
     assemble afb = fmap listLookup (traverse (\a -> fmap (\b -> (a, b)) (afb a)) allValues)
-      where
-        -- listLookup :: [(a,b)] -> a -> b;
-        listLookup [] _ = error "missing value" -- this should never happen
-        listLookup ((a, b):_) a'
-            | a == a' = b
-        listLookup (_:l) a' = listLookup l a'
+        where
+            -- listLookup :: [(a,b)] -> a -> b;
+            listLookup [] _ = error "missing value" -- this should never happen
+            listLookup ((a, b) : _) a'
+                | a == a' = b
+            listLookup (_ : l) a' = listLookup l a'
 
 firstJust :: [Maybe a] -> Maybe a
 firstJust [] = Nothing
-firstJust ((Just a):_) = Just a
-firstJust (Nothing:mas) = firstJust mas
+firstJust ((Just a) : _) = Just a
+firstJust (Nothing : mas) = firstJust mas
 
-finiteSearch :: (Finite a) => (a -> Maybe b) -> Maybe b
+finiteSearch :: Finite a => (a -> Maybe b) -> Maybe b
 finiteSearch p = firstJust (fmap p allValues)
 
-finiteCountPrevious :: (Finite a) => a -> Maybe a
+finiteCountPrevious :: Finite a => a -> Maybe a
 finiteCountPrevious x = findp Nothing allValues
-  where
-    findp ma (a:_)
-        | a == x = ma
-    findp _ (a:as) = findp (Just a) as
-    findp _ [] = seq x (error "missing value")
+    where
+        findp ma (a : _)
+            | a == x = ma
+        findp _ (a : as) = findp (Just a) as
+        findp _ [] = seq x (error "missing value")
 
 firstItem :: [a] -> Maybe a
 firstItem [] = Nothing
-firstItem (a:_) = Just a
+firstItem (a : _) = Just a
 
-finiteCountMaybeNext :: (Finite a) => Maybe a -> Maybe a
+finiteCountMaybeNext :: Finite a => Maybe a -> Maybe a
 finiteCountMaybeNext Nothing = firstItem allValues
 finiteCountMaybeNext (Just x) = findmn allValues
-  where
-    findmn (a:as)
-        | x == a = firstItem as
-    findmn (_:as) = findmn as
-    findmn [] = seq x (error "missing value")
+    where
+        findmn (a : as)
+            | x == a = firstItem as
+        findmn (_ : as) = findmn as
+        findmn [] = seq x (error "missing value")
 
 instance Searchable Void where
     search = finiteSearch
@@ -141,10 +147,11 @@ instance Finite Bool where
     allValues = [False, True]
     assemble afb =
         liftA2
-            (\f t x ->
-                 if x
-                     then t
-                     else f)
+            ( \f t x ->
+                if x
+                    then t
+                    else f
+            )
             (afb False)
             (afb True)
 
@@ -196,7 +203,7 @@ instance Searchable Int64 where
 instance Finite Int64 where
     allValues = enumFrom minBound
 
-instance (Finite a) => Finite (Maybe a) where
+instance Finite a => Finite (Maybe a) where
     allValues = Nothing : (fmap Just allValues)
     assemble mafb = liftA2 maybe (mafb Nothing) (assemble (mafb . Just))
 

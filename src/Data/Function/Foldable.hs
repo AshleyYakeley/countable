@@ -2,12 +2,14 @@
 
 module Data.Function.Foldable
     (
-    ) where
+    )
+where
 
 import Data.Foldable hiding (find)
 import Data.Monoid
-import Data.Searchable
 import Prelude
+
+import Data.Searchable
 
 instance Finite t => Foldable ((->) t) where
     foldMap am ta = mconcat (fmap (am . ta) allValues)

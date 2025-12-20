@@ -10,7 +10,7 @@ class Eq a => Countable a where
     countPrevious :: a -> Maybe a
     countMaybeNext :: Maybe a -> Maybe a
 
-countDown :: (Countable a) => a -> [a]
+countDown :: Countable a => a -> [a]
 countDown a =
     case countPrevious a of
         Just a' -> a' : (countDown a')
@@ -83,7 +83,7 @@ instance Countable Integer where
     countPrevious a = Just (-a)
     countMaybeNext = Just . countNext
 
-instance (Countable a) => Countable (Maybe a) where
+instance Countable a => Countable (Maybe a) where
     countPrevious = fmap countPrevious
     countMaybeNext Nothing = Just Nothing
     countMaybeNext (Just ma) = fmap Just (countMaybeNext ma)
@@ -154,11 +154,11 @@ instance (Countable a, Countable b) => Countable (a, b) where
             _ -> let
                 (a', b') = finalIteration countDownUp ab
                 in case countPrevious a' of
-                       Just a'' -> Just (a'', b')
-                       Nothing ->
-                           case countPrevious b' of
-                               Just b'' -> Just (a', b'')
-                               Nothing -> Nothing
+                    Just a'' -> Just (a'', b')
+                    Nothing ->
+                        case countPrevious b' of
+                            Just b'' -> Just (a', b'')
+                            Nothing -> Nothing
     countMaybeNext Nothing = do
         a <- countMaybeNext Nothing
         b <- countMaybeNext Nothing
@@ -169,11 +169,11 @@ instance (Countable a, Countable b) => Countable (a, b) where
             _ -> let
                 (a', b') = finalIteration countUpDown ab
                 in case countMaybeNext (Just a') of
-                       Just a'' -> Just (a'', b')
-                       Nothing ->
-                           case countMaybeNext (Just b') of
-                               Just b'' -> Just (a', b'')
-                               Nothing -> Nothing
+                    Just a'' -> Just (a'', b')
+                    Nothing ->
+                        case countMaybeNext (Just b') of
+                            Just b'' -> Just (a', b'')
+                            Nothing -> Nothing
 
 -- | Values form a non-empty, possibly finite, countable sequence.
 class Countable a => AtLeastOneCountable a where
@@ -212,7 +212,7 @@ instance AtLeastOneCountable Int64 where
 instance AtLeastOneCountable Integer where
     countFirst = 0
 
-instance (Countable a) => AtLeastOneCountable (Maybe a) where
+instance Countable a => AtLeastOneCountable (Maybe a) where
     countFirst = Nothing
 
 instance (Countable a, AtLeastOneCountable b) => AtLeastOneCountable (Either a b) where
@@ -222,7 +222,7 @@ instance (AtLeastOneCountable a, AtLeastOneCountable b) => AtLeastOneCountable (
     countFirst = (countFirst, countFirst)
 
 -- | Values form an infinite countable sequence.
-class (AtLeastOneCountable a) => InfiniteCountable a where
+class AtLeastOneCountable a => InfiniteCountable a where
     countNext :: Maybe a -> a
 
 instance InfiniteCountable Integer where
@@ -231,7 +231,7 @@ instance InfiniteCountable Integer where
         | a < 0 = -a
     countNext (Just a) = -a - 1
 
-instance (InfiniteCountable a) => InfiniteCountable (Maybe a) where
+instance InfiniteCountable a => InfiniteCountable (Maybe a) where
     countNext = fmap countNext
 
 instance (AtLeastOneCountable a, InfiniteCountable b) => InfiniteCountable (a, b) where
@@ -242,8 +242,8 @@ instance (AtLeastOneCountable a, InfiniteCountable b) => InfiniteCountable (a, b
             _ -> let
                 (a', b') = finalIteration countUpDown ab
                 in case countMaybeNext (Just a') of
-                       Just a'' -> (a'', b')
-                       Nothing -> (a', countNext (Just b'))
+                    Just a'' -> (a'', b')
+                    Nothing -> (a', countNext (Just b'))
 
 recount :: (Countable a, InfiniteCountable b) => a -> b
 recount = countNext . (fmap recount) . countPrevious
@@ -256,52 +256,54 @@ instance (Countable a, InfiniteCountable b) => InfiniteCountable (Either a b) wh
             Nothing -> Right (countNext (Just b))
     countNext (Just (Left a)) = Right (countNext (recount a))
 
-instance (Countable a) => Countable [a] where
+instance Countable a => Countable [a] where
     countPrevious [] = Nothing
-    countPrevious (x:xs) =
+    countPrevious (x : xs) =
         case countMaybeNext Nothing of
             Nothing -> seq x undefined -- x not supposed to exist
             Just firsta -> Just (pp x xs)
-                where pp a r =
-                          case countPrevious a of
-                              Just a' -> firsta : (pp a' r)
-                              Nothing ->
-                                  case r of
-                                      [] -> []
-                                      b:r' ->
-                                          case countMaybeNext (Just b) of
-                                              Just b' -> b' : r'
-                                              Nothing -> firsta : (pp b r')
+                where
+                    pp a r =
+                        case countPrevious a of
+                            Just a' -> firsta : (pp a' r)
+                            Nothing ->
+                                case r of
+                                    [] -> []
+                                    b : r' ->
+                                        case countMaybeNext (Just b) of
+                                            Just b' -> b' : r'
+                                            Nothing -> firsta : (pp b r')
     countMaybeNext Nothing = Just []
     countMaybeNext (Just l) =
         case countMaybeNext Nothing of
             Nothing -> Nothing
             Just firsta -> Just (countNext' l)
-                where countNext' [] = [firsta]
-                      countNext' (a:r) =
-                          case countPrevious a of
-                              Just a' -> firsta : a' : r
-                              Nothing -> upOne (countNext' r)
-                      upOne [] = [firsta]
-                      upOne (a:r) =
-                          case countMaybeNext (Just a) of
-                              Just a' -> a' : r
-                              Nothing -> firsta : a : r
+                where
+                    countNext' [] = [firsta]
+                    countNext' (a : r) =
+                        case countPrevious a of
+                            Just a' -> firsta : a' : r
+                            Nothing -> upOne (countNext' r)
+                    upOne [] = [firsta]
+                    upOne (a : r) =
+                        case countMaybeNext (Just a) of
+                            Just a' -> a' : r
+                            Nothing -> firsta : a : r
 
-instance (Countable a) => AtLeastOneCountable [a] where
+instance Countable a => AtLeastOneCountable [a] where
     countFirst = []
 
-instance (AtLeastOneCountable a) => InfiniteCountable [a] where
+instance AtLeastOneCountable a => InfiniteCountable [a] where
     countNext Nothing = []
     countNext (Just l) = countNext' l
-      where
-        countNext' [] = [countFirst]
-        countNext' (a:r) =
-            case countPrevious a of
-                Just a' -> countFirst : a' : r
-                Nothing -> upOne (countNext' r)
-        upOne [] = [countFirst]
-        upOne (a:r) =
-            case countMaybeNext (Just a) of
-                Just a' -> a' : r
-                Nothing -> countFirst : a : r
+        where
+            countNext' [] = [countFirst]
+            countNext' (a : r) =
+                case countPrevious a of
+                    Just a' -> countFirst : a' : r
+                    Nothing -> upOne (countNext' r)
+            upOne [] = [countFirst]
+            upOne (a : r) =
+                case countMaybeNext (Just a) of
+                    Just a' -> a' : r
+                    Nothing -> countFirst : a : r

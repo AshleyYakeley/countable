@@ -3,14 +3,13 @@ module Main where
 import Data.Proxy
 import Data.Void
 import Data.Word
-import Prelude
 import Test.Tasty
 import Test.Tasty.HUnit
+import Prelude
 
 import Data.Countable
 import Data.Function.Eq ()
 import Data.Searchable
-
 import Golden
 import Show
 import Three
@@ -35,16 +34,16 @@ countableTests' a =
     , testCase "prevMaybeNext" $ prevMaybeNext (Just a)
     ]
 
-findInNext :: (Countable a) => Int -> a -> TestTree
+findInNext :: Countable a => Int -> a -> TestTree
 findInNext n a = testCase "findInNext" $ findInNext' n Nothing
-  where
-    findInNext' 0 _ = assertFailure "failed"
-    findInNext' _ (Just x)
-        | x == a = return ()
-    findInNext' n' mx =
-        case countMaybeNext mx of
-            Nothing -> assertFailure "failed"
-            mx' -> findInNext' (n' - 1) mx'
+    where
+        findInNext' 0 _ = assertFailure "failed"
+        findInNext' _ (Just x)
+            | x == a = return ()
+        findInNext' n' mx =
+            case countMaybeNext mx of
+                Nothing -> assertFailure "failed"
+                mx' -> findInNext' (n' - 1) mx'
 
 countableTests :: (Show a, Countable a) => a -> [TestTree]
 countableTests a = (countableTests' a) ++ [findInNext 1000 a]
@@ -60,23 +59,25 @@ checkN _ 0 _ = return ()
 checkN write n ma = let
     ma' = countMaybeNext ma
     in do
-           prevMaybeNext ma
-           write (show ma ++ "\n")
-           case ma' of
-               Nothing -> return ()
-               _ -> checkN write (n - 1) ma'
+        prevMaybeNext ma
+        write (show ma ++ "\n")
+        case ma' of
+            Nothing -> return ()
+            _ -> checkN write (n - 1) ma'
 
 testType ::
-       forall a. (TypeName a, Show a)
-    => (a -> [TestTree])
-    -> [a]
-    -> TestTree
+    forall a.
+    (TypeName a, Show a) =>
+    (a -> [TestTree]) ->
+    [a] ->
+    TestTree
 testType tests vals = testGroup (typeName (Proxy :: Proxy a)) $ fmap (\a -> testGroup (show a) (tests a)) vals
-    -- This is to prevent overlapping Show function instance in Text.Show.Functions,
-    -- which gets imported somehow with lts-5.
 
-newtype WrapFunction a b =
-    MkWrapFunction (a -> b)
+-- This is to prevent overlapping Show function instance in Text.Show.Functions,
+-- which gets imported somehow with lts-5.
+
+newtype WrapFunction a b
+    = MkWrapFunction (a -> b)
     deriving (Eq, Searchable, Countable, TypeName)
 
 instance (Show a, Finite a, Show b) => Show (WrapFunction a b) where
@@ -106,13 +107,13 @@ allTests =
         , testType countableTests (allValues :: [Void])
         , testType countableTests ([[] :: [Void]])
         , testGroup
-              "list"
-              [ goldenVsWriteString "Bool" "test/count.Bool.ref" $ \write -> checkN write 40 (Nothing :: Maybe [Bool])
-              , goldenVsWriteString "Word8" "test/count.Word8.ref" $ \write ->
-                    checkN write 40 (Nothing :: Maybe [Word8])
-              , goldenVsWriteString "Integer" "test/count.Integer.ref" $ \write ->
-                    checkN write 40 (Nothing :: Maybe [Integer])
-              ]
+            "list"
+            [ goldenVsWriteString "Bool" "test/count.Bool.ref" $ \write -> checkN write 40 (Nothing :: Maybe [Bool])
+            , goldenVsWriteString "Word8" "test/count.Word8.ref" $ \write ->
+                checkN write 40 (Nothing :: Maybe [Word8])
+            , goldenVsWriteString "Integer" "test/count.Integer.ref" $ \write ->
+                checkN write 40 (Nothing :: Maybe [Integer])
+            ]
         ]
 
 main :: IO ()

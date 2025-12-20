@@ -1,7 +1,8 @@
 module Data.Subsingular where
 
-import Data.Searchable
 import Data.Void
+
+import Data.Searchable
 
 -- | Has at most one value. Has `p == q` property.
 class Finite a => Subsingular a where

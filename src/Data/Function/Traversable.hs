@@ -2,7 +2,8 @@
 
 module Data.Function.Traversable
     (
-    ) where
+    )
+where
 
 import Data.Function.Foldable ()
 import Data.Searchable

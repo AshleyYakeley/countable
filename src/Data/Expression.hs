@@ -1,14 +1,16 @@
 module Data.Expression
-    ( Expression(..)
+    ( Expression (..)
     , expressionSym
     , runValueExpression
     , runMatchExpression
-    ) where
+    )
+where
 
 data Expression a g f r
     = ClosedExpression (f r)
-    | OpenExpression a
-                     (Expression a g f (g r))
+    | OpenExpression
+        a
+        (Expression a g f (g r))
 
 instance (Functor f, Functor g) => Functor (Expression a g f) where
     fmap pq (ClosedExpression fp) = ClosedExpression (fmap pq fp)
@@ -26,10 +28,10 @@ instance (Applicative f, Functor g) => Applicative (Expression a g f) where
 expressionSym :: a -> f (g r) -> Expression a g f r
 expressionSym a fbr = OpenExpression a (ClosedExpression fbr)
 
-runValueExpression :: (Functor f) => Expression a ((->) b) f r -> f ((a -> b) -> r)
+runValueExpression :: Functor f => Expression a ((->) b) f r -> f ((a -> b) -> r)
 runValueExpression (ClosedExpression fr) = fmap (\r _ab -> r) fr
 runValueExpression (OpenExpression a0 ebr) = fmap (\abbr ab -> abbr ab (ab a0)) (runValueExpression ebr)
 
-runMatchExpression :: (Functor f) => Expression a ((,) b) f r -> f ([(a, b)], r)
+runMatchExpression :: Functor f => Expression a ((,) b) f r -> f ([(a, b)], r)
 runMatchExpression (ClosedExpression fr) = fmap (\r -> ([], r)) fr
 runMatchExpression (OpenExpression a ebr) = fmap (\(ab, (b, r)) -> ((a, b) : ab, r)) (runMatchExpression ebr)

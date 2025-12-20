@@ -2,6 +2,7 @@
 module Data.Empty where
 
 import Data.Void
+
 import Data.Subsingular
 
 -- | There are no values.
