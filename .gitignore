@@ -1,4 +1,3 @@
 .stack-work
 dist
 *.lkshs
-*.cabal
